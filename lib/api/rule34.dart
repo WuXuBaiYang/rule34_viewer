@@ -28,9 +28,9 @@ mixin Rule34API on CustomAPI {
         .map<PostModel>((e) {
           final img = e.find('img');
           return PostModel.simple(
-            id: e.id.substring(1) ?? '',
-            thumbUrl: img?.getAttrValue('src') ?? '',
+            id: e.id.substring(1),
             href: e.getAttrValue('href') ?? '',
+            thumbUrl: img?.getAttrValue('src') ?? '',
             isVideo: img?.className == 'preview webm-thumb',
           );
         })
