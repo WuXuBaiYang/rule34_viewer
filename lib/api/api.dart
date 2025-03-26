@@ -1,5 +1,6 @@
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:jtech_base/jtech_base.dart';
+import 'package:rule34_viewer/api/rule34.dart';
 import 'package:rule34_viewer/common/common.dart';
 
 /*
@@ -39,7 +40,7 @@ class CustomAPI extends BaseAPI {
 * @author wuxubaiyang
 * @Time 2023/5/29 16:15
 */
-class API extends CustomAPI {
+class API extends CustomAPI with Rule34API {
   static final API _instance = API._internal();
 
   factory API() => _instance;
