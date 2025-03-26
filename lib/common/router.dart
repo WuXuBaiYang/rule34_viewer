@@ -15,14 +15,12 @@ class Router extends BaseRouter {
 
   @override
   List<RouteBase> get routes => [
-        GoRoute(
-          path: '/',
-          builder: (_, state) => HomePage(state: state),
-          routes: [
-            /// TODO 在此处添加子路由
-          ],
-        ),
-      ];
+    GoRoute(
+      path: '/',
+      builder: (_, state) => HomePage(state: state),
+      routes: [],
+    ),
+  ];
 
   // 跳转首页
   void goHome() => go('/');

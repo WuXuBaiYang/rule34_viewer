@@ -33,7 +33,7 @@ class MyApp extends ProviderView {
     return Consumer<ThemeProvider>(
       builder: (_, theme, __) {
         return MaterialApp.router(
-          title: '{jtech_base_app_name}',
+          title: 'Rule34Viewer',
           theme: theme.themeData,
           themeMode: theme.themeMode,
           darkTheme: theme.darkThemeData,

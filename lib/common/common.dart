@@ -13,8 +13,8 @@ class Common {
   static const String baseUrl = kDebugMode ? devUrl : prodUrl;
 
   // 开发地址
-  static const String devUrl = '{jtech_base_dev_url}';
+  static const String devUrl = 'https://rule34.xxx';
 
   // 生产地址
-  static const String prodUrl = '{jtech_base_prod_url}';
+  static const String prodUrl = 'https://rule34.xxx';
 }
