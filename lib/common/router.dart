@@ -1,5 +1,7 @@
 import 'package:jtech_base/jtech_base.dart';
-import 'package:rule34_viewer/page/home/index.dart';
+import 'package:rule34_viewer/page/home/desktop/index.dart';
+import 'package:rule34_viewer/page/home/mobile/index.dart';
+import 'package:rule34_viewer/widget/multi_terminal.dart';
 
 /*
 * 路由管理
@@ -17,7 +19,11 @@ class Router extends BaseRouter {
   List<RouteBase> get routes => [
     GoRoute(
       path: '/',
-      builder: (_, state) => HomePage(state: state),
+      builder:
+          (_, state) => MultiTerminal(
+            desktop: HomeDesktopPage(state: state),
+            mobile: HomeMobilePage(state: state),
+          ),
       routes: [],
     ),
   ];
