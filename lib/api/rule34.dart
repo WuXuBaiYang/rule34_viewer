@@ -1,7 +1,5 @@
 import 'dart:math';
-
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
-import 'package:flutter/material.dart';
 import 'package:jtech_base/common/api/request.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';

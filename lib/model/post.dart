@@ -53,6 +53,9 @@ class PostModel extends BaseModel {
        height = -1,
        postInfo = null;
 
+  // 是否包含帖子详情
+  bool get hasPostInfo => postInfo != null;
+
   @override
   PostModel.from(obj)
     : id = obj?['id'] ?? '',

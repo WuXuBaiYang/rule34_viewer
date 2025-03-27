@@ -1,13 +1,13 @@
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/objectbox.g.dart';
-import 'example.dart';
+import 'collect.dart';
 
 /*
 * 数据库入口
 * @author wuxubaiyang
 * @Time 2023/5/29 16:15
 */
-class Database extends BaseDatabase with ExampleDatabase {
+class Database extends BaseDatabase with CollectDatabase {
   static final Database _instance = Database._internal();
 
   factory Database() => _instance;
