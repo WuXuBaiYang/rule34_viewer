@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 */
 class Common {
   // 数据库名称
-  static const String databaseName = 'rule34_viewer.db';
+  static const String databaseName = 'rule34_viewer';
 
   // 请求基本地址
   static const String baseUrl = kDebugMode ? devUrl : prodUrl;

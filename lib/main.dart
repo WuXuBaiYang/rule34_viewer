@@ -49,6 +49,9 @@ class MyApp extends ProviderView {
     ChangeNotifierProvider<ConfigProvider>(
       create: (context) => ConfigProvider(context),
     ),
+    ChangeNotifierProvider<WindowProvider>(
+      create: (context) => WindowProvider(context),
+    ),
   ];
 
   @override
