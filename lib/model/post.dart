@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/tag.dart';
 
@@ -49,8 +50,8 @@ class PostModel extends BaseModel {
     required this.href,
     required this.isVideo,
   }) : sourceUrl = '',
-       width = 0,
-       height = 0,
+       width = -1,
+       height = -1,
        postInfo = null;
 
   @override
@@ -93,7 +94,7 @@ class PostInfo extends BaseModel {
   final String posterHref;
 
   // 尺寸
-  final String size;
+  final Size size;
 
   // 来源
   final String source;
