@@ -11,13 +11,25 @@ class ConfigProvider extends BaseConfigProvider<AppConfig> {
   // 获取标签集合
   List<String> get tagList => config.tags;
 
+  // 替换全部标签
+  void setTags(List<String> tags) => updateConfig(config.copyWith(tags: tags));
+
   // 添加标签
   void addTag(String tag) =>
       updateConfig(config.copyWith(tags: [...config.tags, tag]));
 
+  // 添加多条标签
+  void addTags(List<String> tags) =>
+      updateConfig(config.copyWith(tags: [...config.tags, ...tags]));
+
   // 移除标签
   void removeTag(String tag) =>
       updateConfig(config.copyWith(tags: config.tags..remove(tag)));
+
+  // 移除多个标签
+  void removeTags(List<String> tags) => updateConfig(
+    config.copyWith(tags: config.tags..removeWhere((e) => tags.contains(e))),
+  );
 
   // 移除所有标签
   void removeAllTag() => updateConfig(config.copyWith(tags: []));

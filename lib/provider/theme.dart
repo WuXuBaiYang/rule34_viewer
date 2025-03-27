@@ -11,11 +11,11 @@ class ThemeProvider extends BaseThemeProvider {
 
   @override
   ThemeData createTheme(ThemeData themeData, Brightness brightness) {
-    return themeData.copyWith();
-  }
-
-  @override
-  CustomTheme? createCustomTheme(ThemeData themeData, Brightness brightness) {
-    return CustomTheme();
+    return themeData.copyWith(
+      chipTheme: ChipThemeData(
+        shape: StadiumBorder(),
+        padding: EdgeInsets.symmetric(horizontal: 8),
+      ),
+    );
   }
 }
