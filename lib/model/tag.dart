@@ -16,4 +16,13 @@ class TagModel extends BaseModel {
   final int count;
 
   TagModel({required this.tag, required this.href, required this.count});
+
+  @override
+  TagModel.from(obj)
+    : tag = obj?['tag'] ?? '',
+      href = obj?['href'] ?? '',
+      count = obj?['href'] ?? '';
+
+  @override
+  Map<String, dynamic> to() => {'tag': tag, 'href': href, 'count': count};
 }

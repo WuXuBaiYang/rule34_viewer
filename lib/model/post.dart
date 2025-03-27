@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/tag.dart';
 
@@ -55,6 +54,29 @@ class PostModel extends BaseModel {
        postInfo = null;
 
   @override
+  PostModel.from(obj)
+    : id = obj?['id'] ?? '',
+      thumbUrl = obj?['thumbUrl'] ?? '',
+      href = obj?['href'] ?? '',
+      isVideo = obj?['isVideo'] ?? false,
+      sourceUrl = obj?['sourceUrl'] ?? '',
+      width = obj?['width'] ?? 0,
+      height = obj?['height'] ?? 0,
+      postInfo = PostInfo.from(obj?['postInfo']);
+
+  @override
+  Map<String, dynamic> to() => {
+    'id': id,
+    'thumbUrl': thumbUrl,
+    'href': href,
+    'isVideo': isVideo,
+    'sourceUrl': sourceUrl,
+    'width': width,
+    'height': height,
+    'postInfo': postInfo?.to(),
+  };
+
+  @override
   PostModel copyWith({
     String? id,
     String? thumbUrl,
@@ -93,8 +115,11 @@ class PostInfo extends BaseModel {
   // 发布人地址
   final String posterHref;
 
-  // 尺寸
-  final Size size;
+  // 资源宽度
+  final double width;
+
+  // 资源高度
+  final double height;
 
   // 来源
   final String source;
@@ -124,7 +149,8 @@ class PostInfo extends BaseModel {
     required this.postTime,
     required this.poster,
     required this.posterHref,
-    required this.size,
+    required this.width,
+    required this.height,
     required this.source,
     required this.rating,
     required this.score,
@@ -134,4 +160,39 @@ class PostInfo extends BaseModel {
     required this.general,
     required this.metadata,
   });
+
+  @override
+  PostInfo.from(obj)
+    : postTime = DateTime.tryParse(obj?['postTime'] ?? '') ?? DateTime(1970),
+      poster = obj?['poster'] ?? '',
+      posterHref = obj?['posterHref'] ?? '',
+      width = obj?['width'] ?? 0,
+      height = obj?['height'] ?? 0,
+      source = obj?['source'] ?? '',
+      rating = obj?['rating'] ?? '',
+      score = obj?['score'] ?? 0,
+      metadata = (obj?['metadata'] as List?)?.map(TagModel.from).toList() ?? [],
+      general = (obj?['general'] as List?)?.map(TagModel.from).toList() ?? [],
+      artists = (obj?['artists'] as List?)?.map(TagModel.from).toList() ?? [],
+      characters =
+          (obj?['characters'] as List?)?.map(TagModel.from).toList() ?? [],
+      copyright =
+          (obj?['copyright'] as List?)?.map(TagModel.from).toList() ?? [];
+
+  @override
+  Map<String, dynamic> to() => {
+    'postTime': postTime.toString(),
+    'poster': poster,
+    'posterHref': posterHref,
+    'width': width,
+    'height': height,
+    'source': source,
+    'rating': rating,
+    'score': score,
+    'metadata': metadata.map((e) => e.to()).toList(),
+    'general': general.map((e) => e.to()).toList(),
+    'artists': artists.map((e) => e.to()).toList(),
+    'characters': characters.map((e) => e.to()).toList(),
+    'copyright': copyright.map((e) => e.to()).toList(),
+  };
 }

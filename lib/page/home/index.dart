@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
-import 'package:rule34_viewer/api/api.dart';
-import 'package:rule34_viewer/model/post.dart';
 
 /*
 * 首页
@@ -19,10 +17,7 @@ class HomePage extends ProviderPage<HomePageProvider> {
 
   @override
   Widget buildWidget(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('首页')),
-      floatingActionButton: FloatingActionButton(onPressed: provider.test),
-    );
+    return Scaffold(body: Center(child: Text('首页')));
   }
 }
 
@@ -33,12 +28,4 @@ class HomePage extends ProviderPage<HomePageProvider> {
 */
 class HomePageProvider extends PageProvider {
   HomePageProvider(super.context, super.state);
-
-  PostModel? post;
-
-  void test() async {
-    post ??= (await api.loadPostList())[2];
-    final rs = await api.getPostInfo(post!);
-    print('');
-  }
 }

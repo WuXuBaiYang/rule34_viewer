@@ -83,10 +83,8 @@ mixin Rule34API on CustomAPI {
       postTime: DateTime.tryParse(postedTime?.trim() ?? '') ?? DateTime(1970),
       poster: stats?.elementAt(1).find('a')?.text.trim() ?? '',
       posterHref: stats?.elementAt(1).find('a')?.getAttrValue('href') ?? '',
-      size: Size(
-        double.tryParse(sizes.first) ?? 0,
-        double.tryParse(sizes.last) ?? 0,
-      ),
+      width: double.tryParse(sizes.first) ?? 0,
+      height: double.tryParse(sizes.last) ?? 0,
       source: source ?? '',
       rating: rating ?? '',
       score: double.tryParse(score ?? '') ?? 0.0,
