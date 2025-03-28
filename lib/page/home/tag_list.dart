@@ -15,17 +15,20 @@ class TagList extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Wrap(
+      child: Row(
         spacing: 6,
         children: List.generate(tagList.length, (i) {
-          return _buildTag(tagList[i]);
+          return _buildTag(context, tagList[i]);
         }),
       ),
     );
   }
 
   // 构建标签项
-  Widget _buildTag(String tag) {
-    return RawChip(label: Text(tag));
+  Widget _buildTag(BuildContext context, String tag) {
+    return RawChip(
+      label: Text(tag),
+      labelStyle: TextTheme.of(context).labelSmall,
+    );
   }
 }

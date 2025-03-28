@@ -26,18 +26,16 @@ mixin Rule34API on CustomAPI {
     return (bs.find('div', class_: 'content')?.findAll('a') ?? <Bs4Element>[])
         .where((e) => e.id.startsWith('p'))
         .map<PostModel>((e) {
-      final img = e.find('img');
-      return PostModel.simple(
-        id: e.id.substring(1),
-        href: e.getAttrValue('href') ?? '',
-        thumbUrl: img?.getAttrValue('src') ?? '',
-        isVideo: img?.className == 'preview webm-thumb',
-      );
-    })
+          final img = e.find('img');
+          return PostModel.simple(
+            id: e.id.substring(1),
+            href: e.getAttrValue('href') ?? '',
+            thumbUrl: img?.getAttrValue('src') ?? '',
+            isVideo: img?.className == 'preview webm-thumb',
+          );
+        })
         .toList();
   }
-
-  BeautifulSoup? bs;
 
   // 获取帖子详情
   Future<PostModel> getPostInfo(PostModel post) async {
@@ -45,46 +43,23 @@ mixin Rule34API on CustomAPI {
     final bs = await _reqPage('post', parameters: parameters);
     // 解析基本参数
     final stats = bs.find('div', id: 'stats')?.findAll('li');
-    final sizes = (stats
-        ?.elementAt(2)
-        .text
-        .replaceAll('Size:', '')
-        .trim() ??
-        '')
+    final sizes = (stats?.elementAt(2).text.replaceAll('Size:', '').trim() ??
+            '')
         .split('x');
     String? source, rating, score;
     if (stats?.length == 5) {
-      rating = stats
-          ?.elementAt(3)
-          .text
-          .replaceAll('Rating:', '')
-          .trim();
-      score = stats
-          ?.elementAt(4)
-          .find('span')
-          ?.text;
+      rating = stats?.elementAt(3).text.replaceAll('Rating:', '').trim();
+      score = stats?.elementAt(4).find('span')?.text;
     } else if (stats?.length == 6) {
       source = stats?.elementAt(3).find('a')?.getAttrValue('href');
-      rating = stats
-          ?.elementAt(4)
-          .text
-          .replaceAll('Rating:', '')
-          .trim();
-      score = stats
-          ?.elementAt(5)
-          .find('span')
-          ?.text;
+      rating = stats?.elementAt(4).text.replaceAll('Rating:', '').trim();
+      score = stats?.elementAt(5).find('span')?.text;
     }
     List<TagModel>? getTags(String class_) {
       return bs.findAll('li', class_: class_).map<TagModel>((e) {
-        final a = e
-            .findAll('a')
-            .lastOrNull;
+        final a = e.findAll('a').lastOrNull;
         final count = int.tryParse(
-          e
-              .find('span', class_: 'tag-count')
-              ?.text
-              .trim() ?? '',
+          e.find('span', class_: 'tag-count')?.text.trim() ?? '',
         );
         return TagModel(
           tag: a?.text.trim() ?? '',
@@ -102,11 +77,7 @@ mixin Rule34API on CustomAPI {
         ?.replaceAll('Posted:', '');
     final postInfo = PostInfo(
       postTime: DateTime.tryParse(postedTime?.trim() ?? '') ?? DateTime(1970),
-      poster: stats
-          ?.elementAt(1)
-          .find('a')
-          ?.text
-          .trim() ?? '',
+      poster: stats?.elementAt(1).find('a')?.text.trim() ?? '',
       posterHref: stats?.elementAt(1).find('a')?.getAttrValue('href') ?? '',
       width: double.tryParse(sizes.first) ?? 0,
       height: double.tryParse(sizes.last) ?? 0,
@@ -140,8 +111,48 @@ mixin Rule34API on CustomAPI {
     );
   }
 
+  // 获取标签列表
+  Future<List<TagModel>> loadTagList({
+    required List<String> tags,
+    int pageIndex = 1,
+    int pageSize = 20,
+    SortType sort = SortType.asc,
+    TagSortType type = TagSortType.update,
+  }) async {
+    final parameters = {
+      's': 'list',
+      'sort': sort.name,
+      'tags': tags.join('+'),
+      'order_by': type.value,
+      'pid': max(0, pageIndex - 1) * pageSize,
+    };
+    final bs = await _reqPage('tags', parameters: parameters);
+    return (bs
+                .find('table', class_: 'highlightable')
+                ?.findAll('tr')
+                .where((e) => !e.hasAttr('class')) ??
+            <Bs4Element>[])
+        .map<TagModel>((e) {
+          final tds = e.findAll('td');
+          final name = tds[1].find('a');
+          return TagModel(
+            tag: name?.text ?? '',
+            href: name?.getAttrValue('href') ?? '',
+            count: int.tryParse(tds[0].text) ?? 0,
+            types:
+                tds[2].nodes.firstOrNull?.text
+                    ?.replaceAll('(', '')
+                    .trim()
+                    .split(',') ??
+                [],
+          );
+        })
+        .toList();
+  }
+
   // 请求rule34的页面接口
-  Future<BeautifulSoup> _reqPage(String page, {
+  Future<BeautifulSoup> _reqPage(
+    String page, {
     Map<String, dynamic> parameters = const {},
   }) {
     final request = RequestModel.query(

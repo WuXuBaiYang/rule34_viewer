@@ -4,7 +4,7 @@ import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/post_grid.dart';
-import 'package:rule34_viewer/page/home/post_type.dart';
+import 'package:rule34_viewer/page/home/tag_dialog.dart';
 import 'package:rule34_viewer/page/home/tag_list.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
@@ -36,7 +36,7 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async{
           context.theme.changeThemeMode(
             context.theme.themeMode == ThemeMode.light
                 ? ThemeMode.dark
@@ -57,14 +57,17 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Row(
             children: [
-              createSelector<PostType?>(
-                builder: (_, selectedType, __) {
-                  return PostTypeTagGroup(
-                    selectedType: selectedType,
-                    onSelected: provider.selectType,
+              Selector<ConfigProvider, bool>(
+                builder: (_, isVideoOnly, __) {
+                  return ChoiceChip(
+                    label: Text('仅视频'),
+                    showCheckmark: false,
+                    selected: isVideoOnly,
+                    onSelected: provider.updateVideoOnly,
+                    labelStyle: TextTheme.of(context).labelSmall,
                   );
                 },
-                selector: (_, p) => p.selectedType,
+                selector: (_, p) => p.isVideoOnly,
               ),
               if (tagList.isNotEmpty) ...[
                 CustomVerticalDivider(size: dividerSize),
@@ -115,8 +118,8 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   // 帖子列数
   int columnCount = 5;
 
-  // 当前选择的帖子类型
-  PostType? selectedType;
+  // 全局配置
+  late final ConfigProvider _config = context.config;
 
   HomeDesktopPageProvider(super.context, super.state) {
     // 监听窗口变化
@@ -125,9 +128,8 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
 
   // 加载帖子列表
   void loadPostList(bool loadMore) async {
-    final tags = context.config.tagList;
     final result = await api.loadPostList(
-      tags: [if (selectedType != null) selectedType!.name, ...tags],
+      tags: [if (_config.isVideoOnly) 'video', ..._config.tagList],
       pageIndex: controller.getPage(loadMore),
       pageSize: controller.pageSize,
     );
@@ -135,14 +137,16 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   }
 
   // 更新标签
-  void updateTags() {
-    /// 更新标签
+  void updateTags() async {
+    final result = await showCustomTagSheet(context, tags: _config.tagList);
+    if (result == null) return;
+    _config.setTags(result);
+    controller.startRefresh();
   }
 
-  // 选择帖子类型
-  void selectType(PostType? type) {
-    selectedType = type;
-    notifyListeners();
+  // 更新仅视频
+  void updateVideoOnly(bool value) {
+    _config.setVideoOnly(value);
     controller.startRefresh();
   }
 

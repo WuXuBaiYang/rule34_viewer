@@ -8,6 +8,13 @@ import 'package:jtech_base/jtech_base.dart';
 class ConfigProvider extends BaseConfigProvider<AppConfig> {
   ConfigProvider(super.context) : super(creator: AppConfig.from);
 
+  // 是否为仅视频模式
+  bool get isVideoOnly => config.isVideoOnly;
+
+  // 设置是否为仅视频模式
+  void setVideoOnly(bool isVideoOnly) =>
+      updateConfig(config.copyWith(isVideoOnly: isVideoOnly));
+
   // 获取标签集合
   List<String> get tagList => config.tags;
 
@@ -64,19 +71,37 @@ class AppConfig extends BaseConfig {
   // 搜索记录
   final List<String> searchHistory;
 
-  AppConfig({required this.tags, required this.searchHistory});
+  // 是否为仅视频模式
+  final bool isVideoOnly;
+
+  AppConfig({
+    required this.tags,
+    required this.searchHistory,
+    required this.isVideoOnly,
+  });
 
   AppConfig.from(obj)
-    : tags = obj?['tags'] ?? [],
-      searchHistory = obj?['searchHistory'] ?? [];
+    : tags = obj?['tags']?.map<String>((e) => e.toString()).toList(),
+      isVideoOnly = obj?['isVideoOnly'] ?? false,
+      searchHistory =
+          obj?['searchHistory']?.map<String>((e) => e.toString()).toList();
 
   @override
-  Map<String, dynamic> to() => {'tags': tags, 'searchHistory': searchHistory};
+  Map<String, dynamic> to() => {
+    'tags': tags,
+    'searchHistory': searchHistory,
+    'isVideoOnly': isVideoOnly,
+  };
 
   @override
-  AppConfig copyWith({List<String>? tags, List<String>? searchHistory}) {
+  AppConfig copyWith({
+    List<String>? tags,
+    List<String>? searchHistory,
+    bool? isVideoOnly,
+  }) {
     return AppConfig(
       tags: tags ?? this.tags,
+      isVideoOnly: isVideoOnly ?? this.isVideoOnly,
       searchHistory: searchHistory ?? this.searchHistory,
     );
   }
