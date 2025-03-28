@@ -4,9 +4,11 @@ import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/post_grid.dart';
+import 'package:rule34_viewer/page/home/post_type.dart';
 import 'package:rule34_viewer/page/home/tag_list.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
+import 'package:rule34_viewer/widget/divider.dart';
 import 'package:window_manager/window_manager.dart';
 
 /*
@@ -47,16 +49,29 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
 
   // 构建标签集合
   Widget _buildTags(BuildContext context) {
+    final dividerSize = Size(20, 20);
     return Selector<ConfigProvider, List<String>>(
-      selector: (_, provider) => provider.tagList,
+      selector: (_, p) => p.tagList,
       builder: (_, tagList, __) {
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           child: Row(
             children: [
-              Expanded(child: TagList(tagList: tagList)),
-              SizedBox.fromSize(size: Size(8, 20), child: VerticalDivider()),
-              SizedBox(width: 8),
+              createSelector<PostType?>(
+                builder: (_, selectedType, __) {
+                  return PostTypeTagGroup(
+                    selectedType: selectedType,
+                    onSelected: provider.selectType,
+                  );
+                },
+                selector: (_, p) => p.selectedType,
+              ),
+              if (tagList.isNotEmpty) ...[
+                CustomVerticalDivider(size: dividerSize),
+                Expanded(child: TagList(tagList: tagList)),
+                CustomVerticalDivider(size: dividerSize),
+              ] else
+                Spacer(),
               IconButton(
                 onPressed: provider.updateTags,
                 icon: Icon(Icons.filter_alt_outlined),
@@ -72,7 +87,7 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
   // 构建帖子列表
   Widget _buildPostGridList(BuildContext context) {
     return createSelector<int>(
-      selector: (_, provider) => provider.columnCount,
+      selector: (_, p) => p.columnCount,
       builder: (_, columnCount, __) {
         return PostGridList(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -100,6 +115,9 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   // 帖子列数
   int columnCount = 5;
 
+  // 当前选择的帖子类型
+  PostType? selectedType;
+
   HomeDesktopPageProvider(super.context, super.state) {
     // 监听窗口变化
     windowManager.addListener(this);
@@ -107,8 +125,9 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
 
   // 加载帖子列表
   void loadPostList(bool loadMore) async {
+    final tags = context.config.tagList;
     final result = await api.loadPostList(
-      tags: [],
+      tags: [if (selectedType != null) selectedType!.name, ...tags],
       pageIndex: controller.getPage(loadMore),
       pageSize: controller.pageSize,
     );
@@ -118,6 +137,13 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   // 更新标签
   void updateTags() {
     /// 更新标签
+  }
+
+  // 选择帖子类型
+  void selectType(PostType? type) {
+    selectedType = type;
+    notifyListeners();
+    controller.startRefresh();
   }
 
   @override
