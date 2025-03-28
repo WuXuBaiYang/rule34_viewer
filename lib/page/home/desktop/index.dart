@@ -4,7 +4,7 @@ import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/post_grid.dart';
-import 'package:rule34_viewer/page/home/tag_dialog.dart';
+import 'package:rule34_viewer/page/home/tag_sheet.dart';
 import 'package:rule34_viewer/page/home/tag_list.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
