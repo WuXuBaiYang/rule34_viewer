@@ -16,6 +16,13 @@ class ThemeProvider extends BaseThemeProvider {
         shape: StadiumBorder(),
         padding: EdgeInsets.symmetric(horizontal: 8),
       ),
+      searchBarTheme: SearchBarThemeData(
+        elevation: WidgetStatePropertyAll(0),
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        ),
+        constraints: BoxConstraints(),
+      ),
     );
   }
 }

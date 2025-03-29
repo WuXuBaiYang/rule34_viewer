@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
+import 'package:rule34_viewer/page/home/tag_list.dart';
 
 /*
 * 自定义tag底部弹层
@@ -12,6 +13,7 @@ Future<List<String>?> showCustomTagSheet(
 }) {
   return showModalBottomSheet(
     context: context,
+    scrollControlDisabledMaxHeightRatio: 0.9,
     builder: (_) => CustomTagSheet(tags: tags),
   );
 }
@@ -34,9 +36,44 @@ class CustomTagSheet extends ProviderView<CustomTagSheetProvider> {
   @override
   Widget buildWidget(BuildContext context) {
     return BottomSheet(
+      clipBehavior: Clip.hardEdge,
       onClosing: () {},
       builder: (_) {
-        return SizedBox();
+        return Scaffold(
+          appBar: AppBar(
+            leading: CloseButton(),
+            title: _buildTagList(),
+            actions: [
+              IconButton(
+                onPressed: () => context.pop(provider.tags),
+                icon: Icon(Icons.check),
+              ),
+              SizedBox(width: 8),
+            ],
+          ),
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14).copyWith(top: 14),
+            child: Column(children: [_buildSearchBar()]),
+          ),
+        );
+      },
+    );
+  }
+
+  // 构建搜索条
+  Widget _buildSearchBar() {
+    return SearchBar(
+      hintText: '搜索标签 仅英文',
+    );
+  }
+
+  // 构建标签列表
+  Widget _buildTagList() {
+    return createSelector<List<String>>(
+      selector: (_, p) => p.tags,
+      builder: (_, tags, __) {
+        if (tags.isEmpty) return Text('管理标签');
+        return TagList(tagList: tags);
       },
     );
   }
