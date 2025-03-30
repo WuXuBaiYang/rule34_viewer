@@ -36,7 +36,7 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async{
+        onPressed: () async {
           context.theme.changeThemeMode(
             context.theme.themeMode == ThemeMode.light
                 ? ThemeMode.dark
@@ -138,7 +138,10 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
 
   // 更新标签
   void updateTags() async {
-    final result = await showCustomTagSheet(context, tags: _config.tagList);
+    final result = await showCustomTagSheet(
+      context,
+      selectedTags: _config.tagList,
+    );
     if (result == null) return;
     _config.setTags(result);
     controller.startRefresh();
