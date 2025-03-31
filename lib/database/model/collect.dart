@@ -12,6 +12,9 @@ import 'package:rule34_viewer/model/post.dart';
 class CollectEntity {
   int id = 0;
 
+  // 帖子id
+  String postId = '';
+
   // 收藏时间
   @Property(type: PropertyType.date)
   DateTime collectTime = DateTime.now();

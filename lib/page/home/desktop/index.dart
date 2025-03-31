@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/api/api.dart';
+import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/post_grid.dart';
@@ -79,6 +80,10 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
                 onPressed: provider.updateTags,
                 icon: Icon(Icons.filter_alt_outlined),
               ),
+              IconButton(
+                onPressed: () => null,
+                icon: Icon(Icons.star_outline_rounded),
+              ),
               IconButton(onPressed: () {}, icon: Icon(Icons.search)),
             ],
           ),
@@ -89,19 +94,22 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
 
   // 构建帖子列表
   Widget _buildPostGridList(BuildContext context) {
-    return createSelector<int>(
-      selector: (_, p) => p.columnCount,
-      builder: (_, columnCount, __) {
+    return createSelector3<int, List<String>, int?>(
+      selector: (_, p) => (p.columnCount, p.collectPostIds, p.hoverIndex),
+      builder: (_, columnCount, collectPostIds, hoverIndex, __) {
         return PostGridList(
+          hoverIndex: hoverIndex,
+          collectPostIds: collectPostIds,
+          onCollect: provider.collectPost,
+          onHoverIndex: provider.updateHoverIndex,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             mainAxisExtent: 180,
-            mainAxisSpacing: 14,
-            crossAxisSpacing: 14,
             crossAxisCount: columnCount,
           ),
           controller: provider.controller,
           onRefreshLoad: provider.loadPostList,
           padding: EdgeInsets.symmetric(horizontal: 14).copyWith(bottom: 14),
+          // onTap: (v)=>,
         );
       },
     );
@@ -120,6 +128,15 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
 
   // 全局配置
   late final ConfigProvider _config = context.config;
+
+  // 已收藏帖子id集合
+  late List<String> collectPostIds = List.from(
+    database.getAllCollectPostIds(),
+    growable: true,
+  );
+
+  // 记录当前hover的index
+  int? hoverIndex;
 
   HomeDesktopPageProvider(super.context, super.state) {
     // 监听窗口变化
@@ -151,6 +168,25 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   void updateVideoOnly(bool value) {
     _config.setVideoOnly(value);
     controller.startRefresh();
+  }
+
+  // 收藏/取消收藏帖子
+  void collectPost(PostModel value) {
+    if (collectPostIds.contains(value.id)) {
+      collectPostIds.remove(value.id);
+      database.unCollectPost(value);
+    } else {
+      collectPostIds.add(value.id);
+      database.collectPost(value);
+    }
+    collectPostIds = List.from(collectPostIds, growable: true);
+    notifyListeners();
+  }
+
+  // 更新当前hover的index
+  void updateHoverIndex(int? index) {
+    hoverIndex = index;
+    notifyListeners();
   }
 
   @override

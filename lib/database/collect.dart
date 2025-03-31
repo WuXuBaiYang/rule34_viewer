@@ -18,12 +18,17 @@ mixin CollectDatabase on BaseDatabase {
   Future<CollectEntity> collectPost(PostModel postInfo) =>
       collectBox.putAndGetAsync(
         CollectEntity()
+          ..postId = postInfo.id
           ..collectTime = DateTime.now()
           ..postInfo = postInfo,
       );
 
   // 取消帖子收藏
-  bool unCollectPost(CollectEntity entity) => collectBox.remove(entity.id);
+  void unCollectPost(PostModel postInfo) =>
+      collectBox
+          .query(CollectEntity_.postId.equals(postInfo.id))
+          .build()
+          .remove();
 
   // 分页获取收藏列表
   List<CollectEntity> getCollectList({int pageIndex = 1, int pageSize = 15}) {
@@ -36,4 +41,12 @@ mixin CollectDatabase on BaseDatabase {
           ..limit = pageSize;
     return query.find();
   }
+
+  // 获取所有已收藏的帖子id
+  List<String> getAllCollectPostIds() => collectBox
+      .query()
+      .build()
+      .find()
+      .map((e) => e.postId)
+      .toList(growable: false);
 }

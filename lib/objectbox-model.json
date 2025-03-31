@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:6234250771155048513",
-      "lastPropertyId": "3:2127997081604986612",
+      "lastPropertyId": "4:7359586988424590428",
       "name": "CollectEntity",
       "properties": [
         {
@@ -22,6 +22,11 @@
         {
           "id": "3:2127997081604986612",
           "name": "dbPostInfo",
+          "type": 9
+        },
+        {
+          "id": "4:7359586988424590428",
+          "name": "postId",
           "type": 9
         }
       ],
