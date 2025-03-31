@@ -5,7 +5,7 @@ import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/post_grid.dart';
 import 'package:rule34_viewer/page/home/tag_sheet.dart';
-import 'package:rule34_viewer/page/home/tag_list.dart';
+import 'package:rule34_viewer/page/home/tag_group.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
 import 'package:rule34_viewer/widget/divider.dart';
@@ -71,7 +71,7 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
               ),
               if (tagList.isNotEmpty) ...[
                 CustomVerticalDivider(size: dividerSize),
-                Expanded(child: TagList(tagList: tagList)),
+                Expanded(child: TagGroup(tagList: tagList)),
                 CustomVerticalDivider(size: dividerSize),
               ] else
                 Spacer(),

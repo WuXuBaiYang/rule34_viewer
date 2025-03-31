@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
+import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 
 /*
@@ -54,7 +55,7 @@ class PostGridList extends StatelessWidget {
         fit: StackFit.expand,
         alignment: Alignment.center,
         children: [
-          CustomImage.network(item.thumbUrl),
+          if (showImage) CustomImage.network(item.thumbUrl),
           if (item.isVideo)
             Align(
               alignment: Alignment.bottomRight,

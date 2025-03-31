@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 
 /*
@@ -58,12 +59,21 @@ extension TagSortTypeExtension on TagSortType {
   // 获取排序字段
   String get label =>
       {
-        TagSortType.name: '默认',
+        TagSortType.name: '名称',
         TagSortType.update: '更新',
         TagSortType.type: '分类',
         TagSortType.count: '总数',
       }[this] ??
       '';
+
+  // 对应图标
+  IconData? get icon =>
+      {
+        TagSortType.name: Icons.tag_rounded,
+        TagSortType.update: Icons.update_rounded,
+        TagSortType.type: Icons.category_rounded,
+        TagSortType.count: Icons.calculate_rounded,
+      }[this];
 
   // 值
   String get value =>

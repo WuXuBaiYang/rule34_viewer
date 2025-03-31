@@ -19,7 +19,7 @@ class ThemeProvider extends BaseThemeProvider {
       searchBarTheme: SearchBarThemeData(
         elevation: WidgetStatePropertyAll(0),
         padding: WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         ),
         constraints: BoxConstraints(),
       ),

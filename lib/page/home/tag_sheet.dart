@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/model/tag.dart';
-import 'package:rule34_viewer/page/home/tag_list.dart';
+import 'package:rule34_viewer/page/home/tag_group.dart';
 
 /*
 * 自定义tag底部弹层
@@ -49,7 +49,7 @@ class CustomTagSheet extends ProviderView<CustomTagSheetProvider> {
               selector: (_, p) => p.selectedTags,
               builder: (_, tags, __) {
                 if (tags.isEmpty) return Text('管理标签');
-                return TagList(tagList: tags);
+                return TagGroup(tagList: tags, onDelete: provider.selectTag);
               },
             ),
             actions: [
@@ -79,6 +79,74 @@ class CustomTagSheet extends ProviderView<CustomTagSheetProvider> {
       hintText: '搜索标签 仅英文',
       controller: provider.searchController,
       onSubmitted: (_) => provider.controller.startRefresh(),
+      trailing: [
+        ValueListenableBuilder(
+          valueListenable: provider.searchController,
+          builder: (_, value, __) {
+            if (value.text.isEmpty) return SizedBox();
+            return IconButton(
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              iconSize: 14,
+              onPressed: () {
+                provider.searchController.clear();
+                provider.controller.startRefresh();
+              },
+              icon: Icon(Icons.close_rounded),
+            );
+          },
+        ),
+        createSelector<SortType>(
+          selector: (_, p) => p.sortType,
+          builder: (_, sortType, __) {
+            final isAsc = sortType == SortType.asc;
+            return RotatedBox(
+              quarterTurns: isAsc ? 0 : 2,
+              child: IconButton(
+                onPressed:
+                    () => provider.updateSortType(
+                      isAsc ? SortType.desc : SortType.asc,
+                    ),
+                icon: Icon(Icons.sort_rounded),
+              ),
+            );
+          },
+        ),
+        createSelector<TagSortType>(
+          selector: (_, p) => p.tagSortType,
+          builder: (_, tagSortType, __) {
+            return DropdownButton<TagSortType>(
+              // icon: SizedBox(),
+              value: tagSortType,
+              underline: SizedBox(),
+              onChanged: provider.updateTagSortType,
+              items: List.generate(TagSortType.values.length, (i) {
+                final type = TagSortType.values[i];
+                return DropdownMenuItem(
+                  value: type,
+                  child: Row(
+                    spacing: 8,
+                    children: [Icon(type.icon), Text(type.label)],
+                  ),
+                );
+              }),
+              selectedItemBuilder: (_) {
+                return List.generate(TagSortType.values.length, (i) {
+                  final type = TagSortType.values[i];
+                  return Padding(
+                    padding: EdgeInsets.only(left: 8, right: 4),
+                    child: Icon(type.icon),
+                  );
+                });
+              },
+            );
+          },
+        ),
+        IconButton(
+          onPressed: provider.controller.startRefresh,
+          icon: Icon(Icons.search_rounded),
+        ),
+      ],
     );
   }
 
@@ -140,6 +208,21 @@ class CustomTagSheetProvider extends BaseProvider {
       selectedTags.add(tag);
     }
     notifyListeners();
+  }
+
+  // 更新排序方式
+  void updateSortType(SortType type) {
+    sortType = type;
+    notifyListeners();
+    controller.startRefresh();
+  }
+
+  // 更新搜索类型
+  void updateTagSortType(TagSortType? type) {
+    if (type == null) return;
+    tagSortType = type;
+    notifyListeners();
+    controller.startRefresh();
   }
 
   // 加载数据
