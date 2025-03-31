@@ -84,10 +84,16 @@ class Router extends BaseRouter {
   void goHome() => go('/');
 
   // 跳转到下载
-  void goDownload() => go('/download');
+  void goDownload() {
+    Toast.show('功能开发中');
+    // go('/download');
+  }
 
   // 跳转设置
-  void goSetting() => go('/setting');
+  void goSetting() {
+    Toast.show('功能开发中');
+    // go('/setting');
+  }
 
   // 跳转搜索
   Future<void> goSearch() => push('/search');
