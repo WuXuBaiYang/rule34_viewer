@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jtech_base/jtech_base.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:rule34_viewer/provider/window.dart';
 import 'package:rule34_viewer/tool/tool.dart';
 import 'package:window_manager/window_manager.dart';
@@ -18,6 +19,7 @@ const Size windowSize = Size(800, 600);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   // 初始化桌面平台
   if (kIsDesktop) {
     await windowManager.ensureInitialized();
