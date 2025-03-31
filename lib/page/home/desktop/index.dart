@@ -5,13 +5,12 @@ import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
-import 'package:rule34_viewer/page/home/post_grid.dart';
 import 'package:rule34_viewer/page/home/tag_sheet.dart';
 import 'package:rule34_viewer/page/home/tag_group.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
 import 'package:rule34_viewer/widget/divider.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
 /*
 * 首页(桌面端)
@@ -36,15 +35,6 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
           _buildTags(context),
           Expanded(child: _buildPostGridList(context)),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          context.theme.changeThemeMode(
-            context.theme.themeMode == ThemeMode.light
-                ? ThemeMode.dark
-                : ThemeMode.light,
-          );
-        },
       ),
     );
   }
@@ -98,37 +88,24 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
 
   // 构建帖子列表
   Widget _buildPostGridList(BuildContext context) {
-    return createSelector3<int, List<String>, int?>(
-      selector: (_, p) => (p.columnCount, p.collectPostIds, p.hoverIndex),
-      builder: (_, columnCount, collectPostIds, hoverIndex, __) {
-        return PostGridList(
+    return createSelector<List<String>>(
+      selector: (_, p) => p.collectPostIds,
+      builder: (_, collectPostIds, __) {
+        return DesktopPostGridList(
           onTap: provider.goPost,
-          hoverIndex: hoverIndex,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
-          onHoverIndex: provider.updateHoverIndex,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            mainAxisExtent: 180,
-            crossAxisCount: columnCount,
-          ),
           controller: provider.controller,
           onRefreshLoad: provider.loadPostList,
-          padding: EdgeInsets.symmetric(horizontal: 14).copyWith(bottom: 14),
         );
       },
     );
   }
 }
 
-class HomeDesktopPageProvider extends PageProvider with WindowListener {
+class HomeDesktopPageProvider extends PageProvider {
   // 帖子控制器
   final controller = CustomRefreshController<PostModel>.empty(pageSize: 42);
-
-  // 默认列宽
-  late final columnWidth = windowSize.width / columnCount;
-
-  // 帖子列数
-  int columnCount = 5;
 
   // 全局配置
   late final ConfigProvider _config = context.config;
@@ -139,13 +116,7 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
     growable: true,
   );
 
-  // 记录当前hover的index
-  int? hoverIndex;
-
-  HomeDesktopPageProvider(super.context, super.state) {
-    // 监听窗口变化
-    windowManager.addListener(this);
-  }
+  HomeDesktopPageProvider(super.context, super.state);
 
   // 加载帖子列表
   void loadPostList(bool loadMore) async {
@@ -187,12 +158,6 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
     notifyListeners();
   }
 
-  // 更新当前hover的index
-  void updateHoverIndex(int? index) {
-    hoverIndex = index;
-    notifyListeners();
-  }
-
   // 跳转到帖子详情
   void goPost(PostModel value) async {
     await router.goPost(value);
@@ -215,18 +180,5 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   void _refreshCollect() {
     collectPostIds = List.from(database.getAllCollectPostIds(), growable: true);
     notifyListeners();
-  }
-
-  @override
-  void onWindowResize() async {
-    final windowSize = await windowManager.getSize();
-    columnCount = windowSize.width ~/ columnWidth;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
   }
 }

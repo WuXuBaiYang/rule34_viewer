@@ -2,11 +2,9 @@ import 'package:jtech_base/jtech_base.dart';
 import 'package:flutter/material.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
-import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
-import 'package:rule34_viewer/page/home/post_grid.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
 /*
 * 收藏页面(桌面端)
@@ -32,20 +30,13 @@ class CollectDesktopPage extends ProviderPage<CollectDesktopProvider> {
 
   // 构建收藏帖子列表
   Widget _buildCollectGridList(BuildContext context) {
-    return createSelector3<int, List<String>, int?>(
-      selector: (_, p) => (p.columnCount, p.collectPostIds, p.hoverIndex),
-      builder: (_, columnCount, collectPostIds, hoverIndex, __) {
-        return PostGridList(
+    return createSelector<List<String>>(
+      selector: (_, p) => p.collectPostIds,
+      builder: (_, collectPostIds, __) {
+        return DesktopPostGridList(
           onTap: router.goPost,
-          hoverIndex: hoverIndex,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
-          onHoverIndex: provider.updateHoverIndex,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            mainAxisExtent: 180,
-            crossAxisCount: columnCount,
-          ),
-          padding: EdgeInsets.all(14),
           controller: provider.controller,
           onRefreshLoad: provider.loadCollectList,
         );
@@ -54,15 +45,9 @@ class CollectDesktopPage extends ProviderPage<CollectDesktopProvider> {
   }
 }
 
-class CollectDesktopProvider extends PageProvider with WindowListener {
+class CollectDesktopProvider extends PageProvider {
   // 帖子控制器
   final controller = CustomRefreshController<PostModel>.empty(pageSize: 42);
-
-  // 默认列宽
-  late final columnWidth = windowSize.width / columnCount;
-
-  // 帖子列数
-  int columnCount = 5;
 
   // 已收藏帖子id集合
   late List<String> collectPostIds = List.from(
@@ -70,13 +55,7 @@ class CollectDesktopProvider extends PageProvider with WindowListener {
     growable: true,
   );
 
-  // 记录当前hover的index
-  int? hoverIndex;
-
-  CollectDesktopProvider(super.context, super.state) {
-    // 监听窗口变化
-    windowManager.addListener(this);
-  }
+  CollectDesktopProvider(super.context, super.state);
 
   // 加载收藏列表
   void loadCollectList(bool loadMore) async {
@@ -103,24 +82,5 @@ class CollectDesktopProvider extends PageProvider with WindowListener {
     }
     collectPostIds = List.from(collectPostIds, growable: true);
     notifyListeners();
-  }
-
-  // 更新当前hover的index
-  void updateHoverIndex(int? index) {
-    hoverIndex = index;
-    notifyListeners();
-  }
-
-  @override
-  void onWindowResize() async {
-    final windowSize = await windowManager.getSize();
-    columnCount = windowSize.width ~/ columnWidth;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    windowManager.removeListener(this);
-    super.dispose();
   }
 }

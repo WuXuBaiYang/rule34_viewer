@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
-import 'package:rule34_viewer/tool/tool.dart';
 
 /*
 * 帖子表格列表
@@ -35,7 +34,7 @@ class PostGridList extends StatelessWidget {
   final int? hoverIndex;
 
   // hover回调
-  final ValueChanged<int?>? onHoverIndex;
+  final ValueChanged<int?>? onItemHover;
 
   const PostGridList({
     super.key,
@@ -45,7 +44,7 @@ class PostGridList extends StatelessWidget {
     this.onTap,
     this.onCollect,
     this.hoverIndex,
-    this.onHoverIndex,
+    this.onItemHover,
     this.collectPostIds = const [],
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
   });
@@ -70,54 +69,62 @@ class PostGridList extends StatelessWidget {
 
   // 构建帖子子项
   Widget _buildGridItem(BuildContext context, PostModel item, int index) {
-    bool hover = kIsMobile ? true : hoverIndex == index;
     final borderColor =
         item.isVideo ? Theme.of(context).primaryColor : Colors.transparent;
+    final decoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      border: Border(bottom: BorderSide(width: 5, color: borderColor)),
+    );
     return InkWell(
+      onTap: () => onTap?.call(item),
       borderRadius: BorderRadius.circular(8),
-      onHover: (v) {
-        if (kIsMobile) return;
-        onHoverIndex?.call(v ? index : null);
-      },
+      onHover: (v) => onItemHover?.call(v ? index : null),
       child: Container(
+        decoration: decoration,
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border(bottom: BorderSide(width: 5, color: borderColor)),
-        ),
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (showImage) CustomImage.network(item.thumbUrl),
-              Padding(
-                padding: EdgeInsets.all(4),
-                child: AnimatedOpacity(
-                  opacity: hover ? 1 : 0,
-                  duration: Duration(milliseconds: 100),
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton.filledTonal(
-                      iconSize: 18,
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(
-                        collectPostIds.contains(item.id)
-                            ? Icons.star_rate_rounded
-                            : Icons.star_border_rounded,
-                      ),
-                      onPressed: () => onCollect?.call(item),
-                    ),
-                  ),
-                ),
-              ),
+              if (showImage)
+                CustomImage.network(item.thumbUrl, fit: BoxFit.cover),
+              if (onCollect != null) ...[
+                if (onItemHover != null)
+                  AnimatedOpacity(
+                    opacity: hoverIndex == index ? 1 : 0,
+                    duration: Duration(milliseconds: 100),
+                    child: _buildGridItemCollect(item),
+                  )
+                else
+                  _buildGridItemCollect(item),
+              ],
             ],
           ),
         ),
       ),
-      onTap: () => onTap?.call(item),
+    );
+  }
+
+  // 构建收藏按钮
+  Widget _buildGridItemCollect(PostModel item) {
+    final isCollect = collectPostIds.contains(item.id);
+    final collectIcon =
+        isCollect ? Icons.star_rate_rounded : Icons.star_border_rounded;
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: EdgeInsets.all(4),
+        child: IconButton.filledTonal(
+          iconSize: 18,
+          isSelected: isCollect,
+          icon: Icon(collectIcon),
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          onPressed: () => onCollect?.call(item),
+        ),
+      ),
     );
   }
 }
