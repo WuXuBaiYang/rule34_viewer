@@ -11,7 +11,7 @@ import 'provider/config.dart';
 import 'provider/theme.dart';
 
 // 是否展示图片
-const bool showImage = true;
+const bool showImage = false;
 
 // 桌面端窗口尺寸
 const Size windowSize = Size(800, 600);

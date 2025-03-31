@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/api/api.dart';
+import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
@@ -81,10 +82,13 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
                 icon: Icon(Icons.filter_alt_outlined),
               ),
               IconButton(
-                onPressed: () => null,
+                onPressed: provider.goCollect,
                 icon: Icon(Icons.star_outline_rounded),
               ),
-              IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+              IconButton(
+                onPressed: provider.goSearch,
+                icon: Icon(Icons.search),
+              ),
             ],
           ),
         );
@@ -98,6 +102,7 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
       selector: (_, p) => (p.columnCount, p.collectPostIds, p.hoverIndex),
       builder: (_, columnCount, collectPostIds, hoverIndex, __) {
         return PostGridList(
+          onTap: provider.goPost,
           hoverIndex: hoverIndex,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
@@ -109,7 +114,6 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
           controller: provider.controller,
           onRefreshLoad: provider.loadPostList,
           padding: EdgeInsets.symmetric(horizontal: 14).copyWith(bottom: 14),
-          // onTap: (v)=>,
         );
       },
     );
@@ -186,6 +190,30 @@ class HomeDesktopPageProvider extends PageProvider with WindowListener {
   // 更新当前hover的index
   void updateHoverIndex(int? index) {
     hoverIndex = index;
+    notifyListeners();
+  }
+
+  // 跳转到帖子详情
+  void goPost(PostModel value) async {
+    await router.goPost(value);
+    _refreshCollect();
+  }
+
+  // 跳转到收藏列表
+  void goCollect() async {
+    await router.goCollect();
+    _refreshCollect();
+  }
+
+  // 跳转到搜索列表
+  void goSearch() async {
+    await router.goSearch();
+    _refreshCollect();
+  }
+
+  // 刷新收藏列表
+  void _refreshCollect() {
+    collectPostIds = List.from(database.getAllCollectPostIds(), growable: true);
     notifyListeners();
   }
 
