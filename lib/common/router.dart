@@ -2,10 +2,16 @@ import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/collect/desktop/index.dart';
 import 'package:rule34_viewer/page/collect/mobile/index.dart';
+import 'package:rule34_viewer/page/download/desktop/index.dart';
+import 'package:rule34_viewer/page/download/mobile/index.dart';
 import 'package:rule34_viewer/page/home/desktop/index.dart';
 import 'package:rule34_viewer/page/home/mobile/index.dart';
+import 'package:rule34_viewer/page/post/desktop/index.dart';
+import 'package:rule34_viewer/page/post/mobile/index.dart';
 import 'package:rule34_viewer/page/search/desktop/index.dart';
 import 'package:rule34_viewer/page/search/mobile/index.dart';
+import 'package:rule34_viewer/page/setting/desktop/index.dart';
+import 'package:rule34_viewer/page/setting/mobile/index.dart';
 import 'package:rule34_viewer/widget/multi_terminal.dart';
 
 /*
@@ -42,8 +48,8 @@ class Router extends BaseRouter {
           path: '/post',
           builder:
               (_, state) => MultiTerminal(
-                // desktop: SearchDesktopPage(state: state),
-                // mobile: SearchMobilePage(state: state),
+                desktop: PostDesktopPage(state: state),
+                mobile: PostMobilePage(state: state),
               ),
         ),
         GoRoute(
@@ -54,12 +60,34 @@ class Router extends BaseRouter {
                 mobile: CollectMobilePage(state: state),
               ),
         ),
+        GoRoute(
+          path: '/download',
+          builder:
+              (_, state) => MultiTerminal(
+                desktop: DownloadDesktopPage(state: state),
+                mobile: DownloadMobilePage(state: state),
+              ),
+        ),
+        GoRoute(
+          path: '/setting',
+          builder:
+              (_, state) => MultiTerminal(
+                desktop: SettingDesktopPage(state: state),
+                mobile: SettingMobilePage(state: state),
+              ),
+        ),
       ],
     ),
   ];
 
   // 跳转首页
   void goHome() => go('/');
+
+  // 跳转到下载
+  void goDownload() => go('/download');
+
+  // 跳转设置
+  void goSetting() => go('/setting');
 
   // 跳转搜索
   Future<void> goSearch() => push('/search');

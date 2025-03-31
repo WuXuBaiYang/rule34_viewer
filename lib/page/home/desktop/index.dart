@@ -29,7 +29,21 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
   @override
   Widget buildWidget(BuildContext context) {
     return Scaffold(
-      appBar: DesktopAppBar(title: Text('Rule34Viewer')),
+      appBar: DesktopAppBar(
+        title: Text('Rule34Viewer'),
+        actions: [
+          IconButton(
+            iconSize: 20,
+            icon: Icon(Icons.download),
+            onPressed: router.goDownload,
+          ),
+          IconButton(
+            iconSize: 20,
+            icon: Icon(Icons.settings),
+            onPressed: router.goSetting,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _buildTags(context),
