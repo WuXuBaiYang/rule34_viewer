@@ -1,5 +1,7 @@
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/page/collect/desktop/index.dart';
+import 'package:rule34_viewer/page/collect/mobile/index.dart';
 import 'package:rule34_viewer/page/home/desktop/index.dart';
 import 'package:rule34_viewer/page/home/mobile/index.dart';
 import 'package:rule34_viewer/page/search/desktop/index.dart';
@@ -48,8 +50,8 @@ class Router extends BaseRouter {
           path: '/collect',
           builder:
               (_, state) => MultiTerminal(
-                // desktop: SearchDesktopPage(state: state),
-                // mobile: SearchMobilePage(state: state),
+                desktop: CollectDesktopPage(state: state),
+                mobile: CollectMobilePage(state: state),
               ),
         ),
       ],
