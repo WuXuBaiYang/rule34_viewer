@@ -1,5 +1,4 @@
 import 'package:jtech_base/jtech_base.dart';
-import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/page/collect/desktop/index.dart';
 import 'package:rule34_viewer/page/collect/mobile/index.dart';
