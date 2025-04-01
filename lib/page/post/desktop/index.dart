@@ -105,7 +105,7 @@ class PostDesktopProvider extends PageProvider {
   // 加载帖子详情
   Future<void> _loadPostInfo(String? id) async {
     if (id == null) throw Exception('请传入帖子id');
-    postInfo = await api.getPostInfo(id, tags ?? []);
+    postInfo = await api.getPostInfo(id, tags);
     if (postInfo!.isVideo) player.open(Media(postInfo!.sourceUrl));
     notifyListeners();
   }
