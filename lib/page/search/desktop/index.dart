@@ -75,11 +75,11 @@ class SearchDesktopPage extends ProviderPage<SearchDesktopProvider> {
       selector: (_, p) => p.collectPostIds,
       builder: (_, collectPostIds, __) {
         return DesktopPostGridList(
-          onTap: router.goPost,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
           controller: provider.controller,
           onRefreshLoad: provider.loadPostList,
+          onTap: (v) => router.goPost(v.id, tags: provider.searchTags),
         );
       },
     );
@@ -101,10 +101,13 @@ class SearchDesktopProvider extends PageProvider {
 
   SearchDesktopProvider(super.context, super.state);
 
+  // 获取搜索标签集合
+  List<String> get searchTags => searchController.text.split(' ');
+
   // 加载帖子列表
   void loadPostList(bool loadMore) async {
     final result = await api.loadPostList(
-      tags: searchController.text.split(' '),
+      tags: searchTags,
       pageIndex: controller.getPage(loadMore),
       pageSize: controller.pageSize,
     );

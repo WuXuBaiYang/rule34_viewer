@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:rule34_viewer/api/api.dart';
+import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
 
 /*
@@ -58,6 +60,16 @@ class PostDesktopPage extends ProviderPage<PostDesktopProvider> {
 }
 
 class PostDesktopProvider extends PageProvider {
+  // 排序类型
+  late final SortType collectSortType =
+      find<SortType>('collectSort') ?? SortType.desc;
+
+  // 是否为收藏夹模式
+  late final bool isCollect = findBool('isCollect') ?? false;
+
+  // 标签集合
+  late final List<String> tags = find<List<String>>('tags') ?? [];
+
   // 播放器
   final player = Player();
 
@@ -70,15 +82,30 @@ class PostDesktopProvider extends PageProvider {
   PostDesktopProvider(super.context, super.state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 初始加载帖子详情
-      _loadPostInfo().loading(context);
+      _loadPostInfo(find('id')).loading(context);
     });
   }
 
+  // 跳转上一页/下一页
+  Future<void> navigateToPost(bool isNext) async {
+    String? postId;
+    if (isCollect) {
+      final collect = database.getCollectNavigatorById(
+        postInfo?.postInfo?.postTime ?? DateTime.now(),
+        isNext: isNext,
+        sort: collectSortType,
+      );
+      postId = collect?.postId;
+    } else {
+      postId = isNext ? postInfo?.nextId : postInfo?.prevId;
+    }
+    _loadPostInfo(postId).loading(context);
+  }
+
   // 加载帖子详情
-  Future<void> _loadPostInfo() async {
-    final extra = getExtra<PostModel>();
-    if (extra == null) throw Exception('请传入帖子详情');
-    postInfo = await api.getPostInfo(extra);
+  Future<void> _loadPostInfo(String? id) async {
+    if (id == null) throw Exception('请传入帖子id');
+    postInfo = await api.getPostInfo(id, tags ?? []);
     if (postInfo!.isVideo) player.open(Media(postInfo!.sourceUrl));
     notifyListeners();
   }

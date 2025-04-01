@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/objectbox.g.dart';
 import 'model/collect.dart';
 
@@ -31,11 +32,17 @@ mixin CollectDatabase on BaseDatabase {
           .remove();
 
   // 分页获取收藏列表
-  List<CollectEntity> getCollectList({int pageIndex = 1, int pageSize = 15}) {
+  List<CollectEntity> getCollectList({
+    int pageIndex = 1,
+    int pageSize = 15,
+    SortType sort = SortType.desc,
+  }) {
+    final desc = sort == SortType.desc;
+    final sortFlags = desc ? Order.descending : 0;
     final query =
         collectBox
             .query()
-            .order(CollectEntity_.collectTime, flags: Order.descending)
+            .order(CollectEntity_.collectTime, flags: sortFlags)
             .build()
           ..offset = max(0, pageIndex - 1) * pageSize
           ..limit = pageSize;
@@ -49,4 +56,25 @@ mixin CollectDatabase on BaseDatabase {
       .find()
       .map((e) => e.postId)
       .toList(growable: false);
+
+  // 根据当前收藏夹id获取上一条/下一条收藏信息
+  CollectEntity? getCollectNavigatorById(
+    DateTime postDate, {
+    bool isNext = true,
+    SortType sort = SortType.desc,
+  }) {
+    final desc = sort == SortType.desc;
+    final sortFlags = desc ? Order.descending : 0;
+    final condition =
+        isNext
+            ? CollectEntity_.collectTime.greaterThanDate(postDate)
+            : CollectEntity_.collectTime.lessThanDate(postDate);
+    final query =
+        collectBox
+            .query(condition)
+            .order(CollectEntity_.collectTime, flags: sortFlags)
+            .build()
+          ..limit = 1;
+    return query.findFirst();
+  }
 }

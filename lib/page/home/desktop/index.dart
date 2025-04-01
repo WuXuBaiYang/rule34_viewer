@@ -135,7 +135,7 @@ class HomeDesktopPageProvider extends PageProvider {
   // 加载帖子列表
   void loadPostList(bool loadMore) async {
     final result = await api.loadPostList(
-      tags: [if (_config.isVideoOnly) 'video', ..._config.tagList],
+      tags: _config.allTagList,
       pageIndex: controller.getPage(loadMore),
       pageSize: controller.pageSize,
     );
@@ -173,8 +173,8 @@ class HomeDesktopPageProvider extends PageProvider {
   }
 
   // 跳转到帖子详情
-  void goPost(PostModel value) async {
-    await router.goPost(value);
+  void goPost(PostModel v) async {
+    await router.goPost(v.id, tags: _config.allTagList);
     _refreshCollect();
   }
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:jtech_base/common/api/request.dart';
@@ -29,7 +30,6 @@ mixin Rule34API on CustomAPI {
           final img = e.find('img');
           return PostModel.simple(
             id: e.id.substring(1),
-            href: e.getAttrValue('href') ?? '',
             thumbUrl: img?.getAttrValue('src') ?? '',
             isVideo: img?.className == 'preview webm-thumb',
           );
@@ -38,8 +38,8 @@ mixin Rule34API on CustomAPI {
   }
 
   // 获取帖子详情
-  Future<PostModel> getPostInfo(PostModel post) async {
-    final parameters = {'s': 'view', 'id': post.id};
+  Future<PostModel> getPostInfo(String id, List<String> tags) async {
+    final parameters = {'s': 'view', 'id': id};
     final bs = await _reqPage('post', parameters: parameters);
     // 解析基本参数
     final stats = bs.find('div', id: 'stats')?.findAll('li');
@@ -78,7 +78,6 @@ mixin Rule34API on CustomAPI {
     final postInfo = PostInfo(
       postTime: DateTime.tryParse(postedTime?.trim() ?? '') ?? DateTime(1970),
       poster: stats?.elementAt(1).find('a')?.text.trim() ?? '',
-      posterHref: stats?.elementAt(1).find('a')?.getAttrValue('href') ?? '',
       width: double.tryParse(sizes.first) ?? 0,
       height: double.tryParse(sizes.last) ?? 0,
       source: source ?? '',
@@ -91,23 +90,44 @@ mixin Rule34API on CustomAPI {
       metadata: getTags('tag-type-metadata tag') ?? [],
     );
     // 解析数据源信息
-    String? sourceUrl;
-    int? width, height;
-    if (post.isVideo) {
-      sourceUrl = bs
-          .find('source', attrs: {'type': 'video/mp4'})
-          ?.getAttrValue('src');
-    } else {
-      final i = bs.find('img', id: 'image');
-      sourceUrl = i?.getAttrValue('src');
-      width = int.tryParse(i?.getAttrValue('width') ?? '');
-      height = int.tryParse(i?.getAttrValue('height') ?? '');
-    }
-    return post.copyWith(
-      width: width,
-      height: height,
+    final videoUrl = bs
+        .find('source', attrs: {'type': 'video/mp4'})
+        ?.getAttrValue('src');
+    final imageUrl = bs.find('img', id: 'image')?.getAttrValue('src');
+    final sourceUrl = videoUrl ?? imageUrl ?? '';
+    final fileKey = sourceUrl.split('/').lastOrNull?.split('.').firstOrNull;
+    final thumbUrl =
+        'https://wimg.rule34.xxx/thumbnails/2916/thumbnail_$fileKey.jpg?$id';
+    final prevNextIds = await getPostIdPrevNext(id, tags);
+    return PostModel(
+      id: id,
+      thumbUrl: thumbUrl,
       postInfo: postInfo,
       sourceUrl: sourceUrl,
+      isVideo: videoUrl != null,
+      prevId: prevNextIds.$1,
+      nextId: prevNextIds.$2,
+    );
+  }
+
+  // 获取帖子前后id元组
+  Future<(String?, String?)> getPostIdPrevNext(
+    String id,
+    List<String> tags,
+  ) async {
+    final request = RequestModel.query(
+      parameters: {
+        'action': 'fetch_id_cache',
+        'tags': tags.isNotEmpty ? tags.join('+') : 'all',
+        'id': id,
+      },
+    );
+    final resp = await get('/public/post_helpers2.php', request: request);
+    final result = jsonDecode(resp.data) as List<String>;
+    final index = result.indexOf(id);
+    return (
+      index > 0 ? result.elementAt(index - 1) : null,
+      result.elementAtOrNull(index + 1),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/widget/desktop_appbar.dart';
 import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
@@ -34,11 +35,11 @@ class CollectDesktopPage extends ProviderPage<CollectDesktopProvider> {
       selector: (_, p) => p.collectPostIds,
       builder: (_, collectPostIds, __) {
         return DesktopPostGridList(
-          onTap: router.goPost,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
           controller: provider.controller,
           onRefreshLoad: provider.loadCollectList,
+          onTap: provider.goPost,
         );
       },
     );
@@ -55,6 +56,9 @@ class CollectDesktopProvider extends PageProvider {
     growable: true,
   );
 
+  // 排序类型
+  SortType sort = SortType.desc;
+
   CollectDesktopProvider(super.context, super.state);
 
   // 加载收藏列表
@@ -64,6 +68,7 @@ class CollectDesktopProvider extends PageProvider {
             .getCollectList(
               pageIndex: controller.getPage(loadMore),
               pageSize: controller.pageSize,
+              sort: sort,
             )
             .where((e) => e.postInfo != null)
             .map<PostModel>((e) => e.postInfo!)
@@ -83,4 +88,8 @@ class CollectDesktopProvider extends PageProvider {
     collectPostIds = List.from(collectPostIds, growable: true);
     notifyListeners();
   }
+
+  // 跳转到帖子详情
+  void goPost(PostModel v) =>
+      router.goPost(v.id, isCollect: true, collectSort: sort);
 }

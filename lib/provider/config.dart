@@ -15,6 +15,9 @@ class ConfigProvider extends BaseConfigProvider<AppConfig> {
   void setVideoOnly(bool isVideoOnly) =>
       updateConfig(config.copyWith(isVideoOnly: isVideoOnly));
 
+  // 获取全部标签集合
+  List<String> get allTagList => [if (isVideoOnly) 'video', ...tagList];
+
   // 获取标签集合
   List<String> get tagList => config.tags;
 
