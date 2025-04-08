@@ -18,6 +18,7 @@ class TagGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Row(
         spacing: 6,
         children: List.generate(tagList.length, (i) {

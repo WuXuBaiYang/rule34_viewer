@@ -59,6 +59,7 @@ class PostGridList extends StatelessWidget {
           padding: padding,
           itemCount: dataList.length,
           gridDelegate: gridDelegate,
+          physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (_, i) {
             return _buildGridItem(context, dataList[i], i);
           },

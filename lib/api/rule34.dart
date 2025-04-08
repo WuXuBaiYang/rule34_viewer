@@ -123,7 +123,7 @@ mixin Rule34API on CustomAPI {
       },
     );
     final resp = await get('/public/post_helpers2.php', request: request);
-    final result = jsonDecode(resp.data) as List<String>;
+    final result = List<String>.from(jsonDecode(resp.data).map((e) => '$e'));
     final index = result.indexOf(id);
     return (
       index > 0 ? result.elementAt(index - 1) : null,
