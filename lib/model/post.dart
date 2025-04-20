@@ -10,6 +10,9 @@ class PostModel extends BaseModel {
   // 帖子id
   final String id;
 
+  // 帖子href
+  final String href;
+
   // 缩略图
   final String thumbUrl;
 
@@ -22,76 +25,88 @@ class PostModel extends BaseModel {
   // 帖子信息
   final PostInfo? postInfo;
 
-  // 前一条帖子id
-  final String? prevId;
+  // 前一条帖子href
+  final String? prevHref;
 
-  // 后一条帖子id
-  final String? nextId;
+  // 后一条帖子href
+  final String? nextHref;
 
   PostModel({
     required this.id,
+    required this.href,
     required this.thumbUrl,
     required this.isVideo,
     required this.sourceUrl,
     required this.postInfo,
-    this.prevId,
-    this.nextId,
+    this.prevHref,
+    this.nextHref,
   });
 
   // 简略信息
   PostModel.simple({
     required this.id,
+    required this.href,
     required this.thumbUrl,
     required this.isVideo,
   }) : sourceUrl = '',
        postInfo = null,
-       prevId = null,
-       nextId = null;
+       prevHref = null,
+       nextHref = null;
 
   // 是否包含帖子详情
   bool get hasPostInfo => postInfo != null;
 
+  // 判断是否存在上一条信息
+  bool get hasPrev => prevHref != null;
+
+  // 判断是否存在下一条信息
+  bool get hasNext => nextHref != null;
+
   @override
   PostModel.from(obj)
     : id = obj?['id'] ?? '',
+      href = obj?['href'] ?? '',
       thumbUrl = obj?['thumbUrl'] ?? '',
       isVideo = obj?['isVideo'] ?? false,
       sourceUrl = obj?['sourceUrl'] ?? '',
       postInfo = PostInfo.from(obj?['postInfo']),
-      prevId = obj?['prevId'],
-      nextId = obj?['nextId'];
+      prevHref = obj?['prevHref'],
+      nextHref = obj?['nextHref'];
 
   @override
   Map<String, dynamic> to() => {
     'id': id,
+    'href': href,
     'thumbUrl': thumbUrl,
     'isVideo': isVideo,
     'sourceUrl': sourceUrl,
     'postInfo': postInfo?.to(),
-    'prevId': prevId,
-    'nextId': nextId,
+    'prevHref': prevHref,
+    'nextHref': nextHref,
   };
 
   @override
   PostModel copyWith({
     String? id,
+    String? href,
     String? thumbUrl,
     bool? isVideo,
     String? sourceUrl,
     int? width,
     int? height,
     PostInfo? postInfo,
-    String? prevId,
-    String? nextId,
+    String? prevHref,
+    String? nextHref,
   }) {
     return PostModel(
       id: id ?? this.id,
+      href: href ?? this.href,
       thumbUrl: thumbUrl ?? this.thumbUrl,
       isVideo: isVideo ?? this.isVideo,
       sourceUrl: sourceUrl ?? this.sourceUrl,
       postInfo: postInfo ?? this.postInfo,
-      prevId: prevId ?? this.prevId,
-      nextId: nextId ?? this.nextId,
+      prevHref: prevHref ?? this.prevHref,
+      nextHref: nextHref ?? this.nextHref,
     );
   }
 }

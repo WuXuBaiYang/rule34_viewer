@@ -8,7 +8,7 @@ import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/tag_sheet.dart';
 import 'package:rule34_viewer/page/home/tag_group.dart';
 import 'package:rule34_viewer/provider/config.dart';
-import 'package:rule34_viewer/widget/desktop_appbar.dart';
+import 'package:rule34_viewer/widget/appbar_desktop.dart';
 import 'package:rule34_viewer/widget/divider.dart';
 import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
@@ -32,11 +32,6 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
       appBar: DesktopAppBar(
         title: Text('Rule34Viewer'),
         actions: [
-          IconButton(
-            iconSize: 20,
-            icon: Icon(Icons.download),
-            onPressed: router.goDownload,
-          ),
           IconButton(
             iconSize: 20,
             icon: Icon(Icons.settings),
@@ -88,6 +83,11 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
               IconButton(
                 onPressed: provider.goCollect,
                 icon: Icon(Icons.star_outline_rounded),
+              ),
+              IconButton(
+                iconSize: 20,
+                icon: Icon(Icons.download),
+                onPressed: router.goDownload,
               ),
               IconButton(
                 onPressed: provider.goSearch,
@@ -174,7 +174,7 @@ class HomeDesktopPageProvider extends PageProvider {
 
   // 跳转到帖子详情
   void goPost(PostModel v) async {
-    await router.goPost(v.id, tags: _config.allTagList);
+    await router.goPost(v);
     _refreshCollect();
   }
 

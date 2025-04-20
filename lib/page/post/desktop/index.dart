@@ -5,9 +5,10 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/database/database.dart';
+import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
-import 'package:rule34_viewer/widget/desktop_appbar.dart';
+import 'package:rule34_viewer/widget/appbar_desktop.dart';
 
 /*
 * 帖子详情(桌面端)
@@ -41,11 +42,11 @@ class PostDesktopPage extends ProviderPage<PostDesktopProvider> {
 
   // 构建帖子详情
   Widget _buildPostInfo(PostModel? postInfo) {
-    if (postInfo == null) return SizedBox();
+    if (postInfo?.postInfo == null) return SizedBox();
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (postInfo.isVideo)
+        if (postInfo!.isVideo)
           Video(controller: provider.controller)
         else
           ExtendedImage.network(
@@ -60,15 +61,8 @@ class PostDesktopPage extends ProviderPage<PostDesktopProvider> {
 }
 
 class PostDesktopProvider extends PageProvider {
-  // 排序类型
-  late final SortType collectSortType =
-      find<SortType>('collectSort') ?? SortType.desc;
-
-  // 是否为收藏夹模式
-  late final bool isCollect = findBool('isCollect') ?? false;
-
-  // 标签集合
-  late final List<String> tags = find<List<String>>('tags') ?? [];
+  // 排序方式
+  late final sort = find<SortType>('sort');
 
   // 播放器
   final player = Player();
@@ -77,36 +71,51 @@ class PostDesktopProvider extends PageProvider {
   late final controller = VideoController(player);
 
   // 帖子详情
-  PostModel? postInfo;
+  late PostModel? postInfo = find<PostModel>('postInfo');
+
+  // 收藏信息
+  late CollectEntity? collectInfo = find<CollectEntity>('collectInfo');
+
+  // 判断是否为收藏状态
+  bool get isCollect => collectInfo != null;
 
   PostDesktopProvider(super.context, super.state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 初始加载帖子详情
-      _loadPostInfo(find('id')).loading(context);
+      // 加载帖子信息
+      final postInfo = this.postInfo ?? collectInfo?.postInfo;
+      if (postInfo != null) _loadPostInfo(postInfo.href).loading(context);
     });
   }
 
-  // 跳转上一页/下一页
-  Future<void> navigateToPost(bool isNext) async {
-    String? postId;
-    if (isCollect) {
-      final collect = database.getCollectNavigatorById(
-        postInfo?.postInfo?.postTime ?? DateTime.now(),
-        isNext: isNext,
-        sort: collectSortType,
-      );
-      postId = collect?.postId;
-    } else {
-      postId = isNext ? postInfo?.nextId : postInfo?.prevId;
-    }
-    _loadPostInfo(postId).loading(context);
+  // 路由帖子信息
+  Future<void> navigatorPost(bool isNext) async {
+    if (isCollect) return _navigatorCollect(isNext);
+    final href = isNext ? postInfo?.nextHref : postInfo?.prevHref;
+    if (href != null) _loadPostInfo(href);
   }
 
-  // 加载帖子详情
-  Future<void> _loadPostInfo(String? id) async {
-    if (id == null) throw Exception('请传入帖子id');
-    postInfo = await api.getPostInfo(id, tags);
-    if (postInfo!.isVideo) player.open(Media(postInfo!.sourceUrl));
+  // 路由收藏帖子信息
+  Future<void> _navigatorCollect(bool isNext) async {
+    if (collectInfo == null || sort == null) return;
+    collectInfo = database.getCollectNavigator(
+      collectInfo!,
+      sort: sort!,
+      isNext: isNext,
+    );
+    final postInfo = collectInfo?.postInfo;
+    if (postInfo != null) return _loadPostInfo(postInfo.href);
+  }
+
+  // 加载帖子信息
+  Future<void> _loadPostInfo(String href) async {
+    final postInfo = await api.getPostInfo(href);
+    _updatePostInfo(postInfo);
+  }
+
+  // 更新帖子信息
+  Future<void> _updatePostInfo(PostModel postInfo) async {
+    if (postInfo.isVideo) player.open(Media(postInfo.sourceUrl));
+    this.postInfo = postInfo;
     notifyListeners();
   }
 

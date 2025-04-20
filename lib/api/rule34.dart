@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:jtech_base/common/api/request.dart';
+import 'package:rule34_viewer/api/rule34_parser.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
 import 'api.dart';
@@ -18,117 +18,46 @@ mixin Rule34API on CustomAPI {
     int pageIndex = 1,
     int pageSize = 42,
   }) async {
-    final parameters = {
-      's': 'list',
-      'tags': tags.join('+'),
-      'pid': max(0, pageIndex - 1) * pageSize,
-    };
-    final bs = await _reqPage('post', parameters: parameters);
-    return (bs.find('div', class_: 'content')?.findAll('a') ?? <Bs4Element>[])
-        .where((e) => e.id.startsWith('p'))
-        .map<PostModel>((e) {
-          final img = e.find('img');
-          return PostModel.simple(
-            id: e.id.substring(1),
-            thumbUrl: img?.getAttrValue('src') ?? '',
-            isVideo: img?.className == 'preview webm-thumb',
-          );
-        })
-        .toList();
+    final bs = await _reqPage(
+      'post',
+      parameters: {
+        's': 'list',
+        'tags': tags.join('+'),
+        'pid': max(0, pageIndex - 1) * pageSize,
+      },
+    );
+    return Rule34WebParser.postList(bs);
   }
 
   // 获取帖子详情
-  Future<PostModel> getPostInfo(String id, List<String> tags) async {
-    final parameters = {'s': 'view', 'id': id};
-    final bs = await _reqPage('post', parameters: parameters);
-    // 解析基本参数
-    final stats = bs.find('div', id: 'stats')?.findAll('li');
-    final sizes = (stats?.elementAt(2).text.replaceAll('Size:', '').trim() ??
-            '')
-        .split('x');
-    String? source, rating, score;
-    if (stats?.length == 5) {
-      rating = stats?.elementAt(3).text.replaceAll('Rating:', '').trim();
-      score = stats?.elementAt(4).find('span')?.text;
-    } else if (stats?.length == 6) {
-      source = stats?.elementAt(3).find('a')?.getAttrValue('href');
-      rating = stats?.elementAt(4).text.replaceAll('Rating:', '').trim();
-      score = stats?.elementAt(5).find('span')?.text;
-    }
-    List<TagModel>? getTags(String class_) {
-      return bs.findAll('li', class_: class_).map<TagModel>((e) {
-        final a = e.findAll('a').lastOrNull;
-        final count = int.tryParse(
-          e.find('span', class_: 'tag-count')?.text.trim() ?? '',
-        );
-        return TagModel(
-          tag: a?.text.trim() ?? '',
-          href: a?.getAttrValue('href') ?? '',
-          count: count ?? 0,
-        );
-      }).toList();
-    }
-
-    final postedTime = stats
-        ?.elementAt(1)
-        .nodes
-        .firstOrNull
-        ?.text
-        ?.replaceAll('Posted:', '');
-    final postInfo = PostInfo(
-      postTime: DateTime.tryParse(postedTime?.trim() ?? '') ?? DateTime(1970),
-      poster: stats?.elementAt(1).find('a')?.text.trim() ?? '',
-      width: double.tryParse(sizes.first) ?? 0,
-      height: double.tryParse(sizes.last) ?? 0,
-      source: source ?? '',
-      rating: rating ?? '',
-      score: double.tryParse(score ?? '') ?? 0.0,
-      copyright: getTags('tag-type-copyright tag') ?? [],
-      characters: getTags('tag-type-character tag') ?? [],
-      artists: getTags('tag-type-artist tag') ?? [],
-      general: getTags('tag-type-general tag') ?? [],
-      metadata: getTags('tag-type-metadata tag') ?? [],
-    );
-    // 解析数据源信息
-    final videoUrl = bs
-        .find('source', attrs: {'type': 'video/mp4'})
-        ?.getAttrValue('src');
-    final imageUrl = bs.find('img', id: 'image')?.getAttrValue('src');
-    final sourceUrl = videoUrl ?? imageUrl ?? '';
-    final fileKey = sourceUrl.split('/').lastOrNull?.split('.').firstOrNull;
-    final thumbUrl =
-        'https://wimg.rule34.xxx/thumbnails/2916/thumbnail_$fileKey.jpg?$id';
-    final prevNextIds = await getPostIdPrevNext(id, tags);
-    return PostModel(
-      id: id,
-      thumbUrl: thumbUrl,
-      postInfo: postInfo,
-      sourceUrl: sourceUrl,
-      isVideo: videoUrl != null,
-      prevId: prevNextIds.$1,
-      nextId: prevNextIds.$2,
+  Future<PostModel> getPostInfo(String href) async {
+    final parameters = Uri.parse(href).queryParameters;
+    return Rule34WebParser.postInfo(
+      href: href,
+      await htmlGet(href),
+      ids: await getPostNavigatorIds(
+        parameters['id'] ?? '',
+        parameters['tags']?.split('+') ?? [],
+      ),
     );
   }
 
   // 获取帖子前后id元组
-  Future<(String?, String?)> getPostIdPrevNext(
+  Future<PostNavigatorIds> getPostNavigatorIds(
     String id,
     List<String> tags,
   ) async {
-    final request = RequestModel.query(
-      parameters: {
-        'action': 'fetch_id_cache',
-        'tags': tags.isNotEmpty ? tags.join('+') : 'all',
-        'id': id,
-      },
+    final resp = await get(
+      '/public/post_helpers2.php',
+      request: RequestModel.query(
+        parameters: {
+          'action': 'fetch_id_cache',
+          'tags': tags.isNotEmpty ? tags.join('+') : 'all',
+          'id': id,
+        },
+      ),
     );
-    final resp = await get('/public/post_helpers2.php', request: request);
-    final result = List<String>.from(jsonDecode(resp.data).map((e) => '$e'));
-    final index = result.indexOf(id);
-    return (
-      index > 0 ? result.elementAt(index - 1) : null,
-      result.elementAtOrNull(index + 1),
-    );
+    return Rule34WebParser.postNavigatorIds(resp.data, id);
   }
 
   // 获取标签列表
@@ -139,35 +68,17 @@ mixin Rule34API on CustomAPI {
     SortType sort = SortType.asc,
     TagSortType type = TagSortType.update,
   }) async {
-    final parameters = {
-      's': 'list',
-      'sort': sort.name,
-      'tags': tags.join('+'),
-      'order_by': type.value,
-      'pid': max(0, pageIndex - 1) * pageSize,
-    };
-    final bs = await _reqPage('tags', parameters: parameters);
-    return (bs
-                .find('table', class_: 'highlightable')
-                ?.findAll('tr')
-                .where((e) => !e.hasAttr('class')) ??
-            <Bs4Element>[])
-        .map<TagModel>((e) {
-          final tds = e.findAll('td');
-          final name = tds[1].find('a');
-          return TagModel(
-            tag: name?.text ?? '',
-            href: name?.getAttrValue('href') ?? '',
-            count: int.tryParse(tds[0].text) ?? 0,
-            types:
-                tds[2].nodes.firstOrNull?.text
-                    ?.replaceAll('(', '')
-                    .trim()
-                    .split(',') ??
-                [],
-          );
-        })
-        .toList();
+    final bs = await _reqPage(
+      'tags',
+      parameters: {
+        's': 'list',
+        'sort': sort.name,
+        'tags': tags.join('+'),
+        'order_by': type.value,
+        'pid': max(0, pageIndex - 1) * pageSize,
+      },
+    );
+    return Rule34WebParser.tagList(bs);
   }
 
   // 请求rule34的页面接口

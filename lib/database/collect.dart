@@ -58,12 +58,13 @@ mixin CollectDatabase on BaseDatabase {
       .toList(growable: false);
 
   // 根据当前收藏夹id获取上一条/下一条收藏信息
-  CollectEntity? getCollectNavigatorById(
-    DateTime postDate, {
+  CollectEntity? getCollectNavigator(
+    CollectEntity collectInfo, {
     bool isNext = true,
     SortType sort = SortType.desc,
   }) {
     final desc = sort == SortType.desc;
+    final postDate = collectInfo.collectTime;
     final sortFlags = desc ? Order.descending : 0;
     final condition =
         isNext

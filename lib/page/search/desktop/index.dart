@@ -4,7 +4,7 @@ import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/model/post.dart';
-import 'package:rule34_viewer/widget/desktop_appbar.dart';
+import 'package:rule34_viewer/widget/appbar_desktop.dart';
 import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
 /*
@@ -75,11 +75,11 @@ class SearchDesktopPage extends ProviderPage<SearchDesktopProvider> {
       selector: (_, p) => p.collectPostIds,
       builder: (_, collectPostIds, __) {
         return DesktopPostGridList(
+          onTap: router.goPost,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
           controller: provider.controller,
           onRefreshLoad: provider.loadPostList,
-          onTap: (v) => router.goPost(v.id, tags: provider.searchTags),
         );
       },
     );

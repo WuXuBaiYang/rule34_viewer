@@ -2,10 +2,10 @@ import 'package:jtech_base/jtech_base.dart';
 import 'package:flutter/material.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
-import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/tag.dart';
-import 'package:rule34_viewer/widget/desktop_appbar.dart';
-import 'package:rule34_viewer/widget/post_grid_desktop.dart';
+import 'package:rule34_viewer/widget/appbar_desktop.dart';
+import 'package:rule34_viewer/widget/collect_post_grid_desktop.dart';
 
 /*
 * 收藏页面(桌面端)
@@ -31,30 +31,18 @@ class CollectDesktopPage extends ProviderPage<CollectDesktopProvider> {
 
   // 构建收藏帖子列表
   Widget _buildCollectGridList(BuildContext context) {
-    return createSelector<List<String>>(
-      selector: (_, p) => p.collectPostIds,
-      builder: (_, collectPostIds, __) {
-        return DesktopPostGridList(
-          collectPostIds: collectPostIds,
-          onCollect: provider.collectPost,
-          controller: provider.controller,
-          onRefreshLoad: provider.loadCollectList,
-          onTap: provider.goPost,
-        );
-      },
+    return DesktopCollectPostGridList(
+      onCollect: provider.collectPost,
+      controller: provider.controller,
+      onRefreshLoad: provider.loadCollectList,
+      onTap: (v) => router.goPostByCollect(v, provider.sort),
     );
   }
 }
 
 class CollectDesktopProvider extends PageProvider {
   // 帖子控制器
-  final controller = CustomRefreshController<PostModel>.empty(pageSize: 42);
-
-  // 已收藏帖子id集合
-  late List<String> collectPostIds = List.from(
-    database.getAllCollectPostIds(),
-    growable: true,
-  );
+  final controller = CustomRefreshController<CollectEntity>.empty(pageSize: 99);
 
   // 排序类型
   SortType sort = SortType.desc;
@@ -63,33 +51,24 @@ class CollectDesktopProvider extends PageProvider {
 
   // 加载收藏列表
   void loadCollectList(bool loadMore) async {
-    final result =
-        database
-            .getCollectList(
-              pageIndex: controller.getPage(loadMore),
-              pageSize: controller.pageSize,
-              sort: sort,
-            )
-            .where((e) => e.postInfo != null)
-            .map<PostModel>((e) => e.postInfo!)
-            .toList();
+    final result = database.getCollectList(
+      pageIndex: controller.getPage(loadMore),
+      pageSize: controller.pageSize,
+      sort: sort,
+    );
     controller.finish(result, loadMore);
   }
 
   // 收藏/取消收藏帖子
-  void collectPost(PostModel value) {
-    if (collectPostIds.contains(value.id)) {
-      collectPostIds.remove(value.id);
-      database.unCollectPost(value);
+  void collectPost(CollectEntity v) {
+    final postInfo = v.postInfo;
+    if (postInfo == null) return;
+    if (controller.value.data.any((e) => v == e)) {
+      database.unCollectPost(postInfo);
+      controller.remove(v);
     } else {
-      collectPostIds.add(value.id);
-      database.collectPost(value);
+      database.collectPost(postInfo);
+      controller.add(v);
     }
-    collectPostIds = List.from(collectPostIds, growable: true);
-    notifyListeners();
   }
-
-  // 跳转到帖子详情
-  void goPost(PostModel v) =>
-      router.goPost(v.id, isCollect: true, collectSort: sort);
 }

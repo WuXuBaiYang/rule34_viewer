@@ -1,4 +1,6 @@
 import 'package:jtech_base/jtech_base.dart';
+import 'package:rule34_viewer/database/model/collect.dart';
+import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/page/collect/desktop/index.dart';
 import 'package:rule34_viewer/page/collect/mobile/index.dart';
@@ -99,20 +101,12 @@ class Router extends BaseRouter {
   Future<void> goSearch() => push('/search');
 
   // 跳转到帖子详情
-  Future<void> goPost(
-    String id, {
-    List<String> tags = const [],
-    bool isCollect = false,
-    SortType collectSort = SortType.desc,
-  }) => push(
-    '/post',
-    extra: {
-      'id': id,
-      'tags': tags,
-      'isCollect': isCollect,
-      'collectSort': collectSort,
-    },
-  );
+  Future<void> goPost(PostModel postInfo) =>
+      push('/post', extra: {'postInfo': postInfo});
+
+  // 跳转到帖子详情-从收藏
+  Future<void> goPostByCollect(CollectEntity collectInfo, SortType sort) =>
+      push('/post', extra: {'collectInfo': collectInfo, 'sort': sort});
 
   // 跳转到收藏
   Future<void> goCollect() => push('/collect');
