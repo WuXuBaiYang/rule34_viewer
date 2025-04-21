@@ -1,8 +1,6 @@
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/page/collect/desktop/index.dart';
 import 'package:rule34_viewer/page/collect/mobile/index.dart';
-import 'package:rule34_viewer/page/download/desktop/index.dart';
-import 'package:rule34_viewer/page/download/mobile/index.dart';
 import 'package:rule34_viewer/page/home/desktop/index.dart';
 import 'package:rule34_viewer/page/home/mobile/index.dart';
 import 'package:rule34_viewer/page/search/desktop/index.dart';
@@ -50,14 +48,6 @@ class Router extends BaseRouter {
               ),
         ),
         GoRoute(
-          path: '/download',
-          builder:
-              (_, state) => MultiTerminal(
-                desktop: DownloadDesktopPage(state: state),
-                mobile: DownloadMobilePage(state: state),
-              ),
-        ),
-        GoRoute(
           path: '/setting',
           builder:
               (_, state) => MultiTerminal(
@@ -71,12 +61,6 @@ class Router extends BaseRouter {
 
   // 跳转首页
   void goHome() => go('/');
-
-  // 跳转到下载
-  void goDownload() {
-    Toast.show('功能开发中');
-    // go('/download');
-  }
 
   // 跳转设置
   void goSetting() {

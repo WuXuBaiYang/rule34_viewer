@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/main.dart';
+import 'package:rule34_viewer/widget/post_grid.dart';
 
 /*
 * 收藏帖子表格列表
@@ -27,6 +28,9 @@ class CollectPostGridList extends StatelessWidget {
   // 帖子点击世间
   final ValueChanged<CollectEntity>? onTap;
 
+  // 列表项点击事件
+  final GridItemBuilder<CollectEntity>? itemBuilder;
+
   const CollectPostGridList({
     super.key,
     required this.controller,
@@ -34,6 +38,7 @@ class CollectPostGridList extends StatelessWidget {
     required this.onRefreshLoad,
     this.onTap,
     this.onCollect,
+    this.itemBuilder,
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
   });
 
@@ -49,7 +54,9 @@ class CollectPostGridList extends StatelessWidget {
           gridDelegate: gridDelegate,
           physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (_, i) {
-            return _buildGridItem(context, dataList[i], i);
+            final item = dataList[i];
+            final child = _buildGridItem(context, item, i);
+            return itemBuilder?.call(context, item, child) ?? child;
           },
         );
       },

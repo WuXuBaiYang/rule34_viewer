@@ -61,22 +61,34 @@ mixin CollectDatabase on BaseDatabase {
       .map((e) => e.postId)
       .toList(growable: false);
 
+  // 判断是否存在上一条收藏
+  bool hasPrevCollect(
+    CollectEntity collectInfo, {
+    SortType sort = SortType.desc,
+  }) => getCollectNavigator(collectInfo, isNext: false, sort: sort) != null;
+
+  // 判断是否存在下一条收藏
+  bool hasNextCollect(
+    CollectEntity collectInfo, {
+    SortType sort = SortType.desc,
+  }) => getCollectNavigator(collectInfo, isNext: true, sort: sort) != null;
+
   // 根据当前收藏夹id获取上一条/下一条收藏信息
   CollectEntity? getCollectNavigator(
     CollectEntity collectInfo, {
     bool isNext = true,
     SortType sort = SortType.desc,
   }) {
-    final desc = sort == SortType.desc;
+    final isDesc = sort == SortType.desc;
     final postDate = collectInfo.collectTime;
-    final sortFlags = desc ? Order.descending : 0;
-    final condition =
-        isNext
-            ? CollectEntity_.collectTime.greaterThanDate(postDate)
-            : CollectEntity_.collectTime.lessThanDate(postDate);
+    final sortFlags = isDesc ? Order.descending : 0;
+    final less = CollectEntity_.collectTime.lessThanDate(postDate);
+    final greater = CollectEntity_.collectTime.greaterThanDate(postDate);
     final query =
         collectBox
-            .query(condition)
+            .query(
+              isDesc ? (isNext ? less : greater) : (isNext ? greater : less),
+            )
             .order(CollectEntity_.collectTime, flags: sortFlags)
             .build()
           ..limit = 1;

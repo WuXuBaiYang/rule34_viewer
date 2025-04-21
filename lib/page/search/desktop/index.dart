@@ -123,13 +123,13 @@ class SearchDesktopProvider extends PageProvider {
   }
 
   // 收藏/取消收藏帖子
-  void collectPost(PostModel v) {
+  void collectPost(PostModel v) async {
     if (collectPostIds.contains(v.id)) {
       collectPostIds.remove(v.id);
       database.unCollectPost(v.id);
     } else {
       collectPostIds.add(v.id);
-      database.collectPost(v);
+      await database.collectPost(v);
     }
     _refreshCollect();
   }

@@ -101,17 +101,20 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
 
   // 构建帖子详情
   Widget _buildPostInfo() {
-    return createSelector<PostModel?>(
-      selector: (_, p) => p.postInfo,
-      builder: (_, postInfo, __) {
-        if (postInfo == null) return const SizedBox();
+    return createSelector3<PostModel?, bool, bool>(
+      selector: (_, p) => (p.postInfo, p.hasPrev, p.hasNext),
+      builder: (_, postInfo, hasPrev, hasNext, __) {
         return Row(
           spacing: 14,
           children: [
-            IconButton(
-              onPressed: () => provider.navigatorPost(false).loading(context),
-              icon: Icon(Icons.arrow_back_ios_new_rounded),
-              padding: EdgeInsets.symmetric(vertical: 45),
+            AnimatedOpacity(
+              opacity: hasPrev ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: IconButton(
+                onPressed: () => provider.navigatorPost(false).loading(context),
+                icon: Icon(Icons.arrow_back_ios_new_rounded),
+                padding: EdgeInsets.symmetric(vertical: 45),
+              ),
             ),
             Expanded(
               child: Column(
@@ -125,7 +128,7 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
                       margin: EdgeInsets.zero,
                       clipBehavior: Clip.antiAlias,
                       child:
-                          postInfo.isVideo
+                          postInfo?.isVideo == true
                               ? _buildPostVideo(postInfo)
                               : _buildPostImage(postInfo),
                     ),
@@ -133,10 +136,14 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
                 ],
               ),
             ),
-            IconButton(
-              onPressed: () => provider.navigatorPost(true).loading(context),
-              icon: Icon(Icons.arrow_forward_ios_rounded),
-              padding: EdgeInsets.symmetric(vertical: 45),
+            AnimatedOpacity(
+              opacity: hasNext ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: IconButton(
+                onPressed: () => provider.navigatorPost(true).loading(context),
+                icon: Icon(Icons.arrow_forward_ios_rounded),
+                padding: EdgeInsets.symmetric(vertical: 45),
+              ),
             ),
           ],
         );
@@ -145,14 +152,14 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
   }
 
   // 构建标题信息
-  Widget _buildPostTitle(PostModel postInfo) {
+  Widget _buildPostTitle(PostModel? postInfo) {
     return Row(
       spacing: 14,
       children: [
         CloseButton(),
         TextButton(
           onPressed: provider.goToPoster,
-          child: Text('@${postInfo.postInfo?.poster}'),
+          child: Text('@${postInfo?.postInfo?.poster ?? ''}'),
         ),
         TextButton(
           onPressed: provider.goToPoster,
@@ -160,7 +167,7 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
             maximumSize: WidgetStatePropertyAll(Size(200, 40)),
           ),
           child: Text(
-            postInfo.href,
+            postInfo?.href ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -187,7 +194,8 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
   }
 
   // 构建帖子图片信息
-  Widget _buildPostImage(PostModel postInfo) {
+  Widget _buildPostImage(PostModel? postInfo) {
+    if (postInfo == null) return const SizedBox();
     return ExtendedImage.network(
       cache: true,
       postInfo.sourceUrl,
@@ -197,7 +205,8 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
   }
 
   // 构建帖子视频信息
-  Widget _buildPostVideo(PostModel postInfo) {
+  Widget _buildPostVideo(PostModel? postInfo) {
+    if (postInfo == null) return const SizedBox();
     return Video(controller: provider.controller);
   }
 }
@@ -221,6 +230,12 @@ class PostDesktopProvider extends BaseProvider {
   // 记录当前是否为收藏状态
   bool isCollect = false;
 
+  // 是否存在上一条数据
+  bool hasPrev = false;
+
+  // 是否存在下一条数据
+  bool hasNext = false;
+
   PostDesktopProvider(
     super.context, {
     PostModel? postInfo,
@@ -237,19 +252,22 @@ class PostDesktopProvider extends BaseProvider {
 
   // 路由帖子信息
   Future<void> navigatorPost(bool isNext) async {
-    if (collectInfo != null) return await _navigatorCollect(isNext);
+    await player.pause();
+    if (collectInfo != null) return _navigatorCollect(isNext);
     final href = isNext ? postInfo?.nextHref : postInfo?.prevHref;
-    if (href != null) await _loadPostInfo(href);
+    if (href != null) return _loadPostInfo(href);
   }
 
   // 路由收藏帖子信息
   Future<void> _navigatorCollect(bool isNext) async {
     if (collectInfo == null) return;
-    collectInfo = database.getCollectNavigator(
-      collectInfo!,
-      isNext: isNext,
-      sort: sort,
-    );
+    collectInfo =
+        database.getCollectNavigator(
+          collectInfo!,
+          isNext: isNext,
+          sort: sort,
+        ) ??
+        collectInfo;
     final href = collectInfo?.href;
     if (href != null) return _loadPostInfo(href);
   }
@@ -264,6 +282,14 @@ class PostDesktopProvider extends BaseProvider {
   Future<void> _updatePostInfo(PostModel postInfo) async {
     if (postInfo.isVideo) player.open(Media(postInfo.sourceUrl));
     this.postInfo = postInfo;
+    // 更新上下条数据状态
+    if (collectInfo != null) {
+      hasPrev = database.hasPrevCollect(collectInfo!, sort: sort);
+      hasNext = database.hasNextCollect(collectInfo!, sort: sort);
+    } else {
+      hasPrev = postInfo.prevHref != null;
+      hasNext = postInfo.nextHref != null;
+    }
     notifyListeners();
   }
 
@@ -288,6 +314,8 @@ class PostDesktopProvider extends BaseProvider {
 
   // 显示帖子信息
   void showPostInfo() {
+    if (postInfo == null) return;
+
     /// 显示帖子信息
   }
 

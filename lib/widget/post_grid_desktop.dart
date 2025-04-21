@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:jtech_base/widget/refresh.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/tool/download.dart';
 import 'package:rule34_viewer/widget/post_grid.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -45,6 +47,9 @@ class DesktopPostGridList extends StatefulWidget {
 
 class _DesktopPostGridListState extends State<DesktopPostGridList>
     with WindowListener {
+  // 右键菜单控制器
+  final contextMenuController = ContextMenuController();
+
   // 默认列宽
   late final columnWidth = windowSize.width / widget.initialColumnCount;
 
@@ -79,6 +84,27 @@ class _DesktopPostGridListState extends State<DesktopPostGridList>
           widget.onCollect != null
               ? (v) => setState(() => widget.onCollect?.call(v))
               : null,
+      itemBuilder: (_, item, child) {
+        final isCollect = widget.collectPostIds.contains(item.id);
+        return ContextMenuRegion<int?>(
+          contextMenu: ContextMenu(
+            borderRadius: BorderRadius.circular(8),
+            entries: [
+              MenuItem(label: '查看', value: 0),
+              MenuItem(label: isCollect ? '取消收藏' : '收藏', value: 1),
+              MenuItem(label: item.isVideo ? '下载' : '另存为', value: 2),
+            ],
+          ),
+          onItemSelected:
+              (v) => switch (v) {
+                0 => widget.onTap?.call(item),
+                1 => widget.onCollect?.call(item),
+                2 => Downloader.savePost(item),
+                _ => null,
+              },
+          child: child,
+        );
+      },
     );
   }
 

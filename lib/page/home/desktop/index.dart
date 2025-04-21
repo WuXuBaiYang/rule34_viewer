@@ -86,11 +86,6 @@ class HomeDesktopPage extends ProviderPage<HomeDesktopPageProvider> {
                 icon: Icon(Icons.star_outline_rounded),
               ),
               IconButton(
-                iconSize: 20,
-                icon: Icon(Icons.download),
-                onPressed: router.goDownload,
-              ),
-              IconButton(
                 onPressed: provider.goSearch,
                 icon: Icon(Icons.search),
               ),
@@ -161,13 +156,13 @@ class HomeDesktopPageProvider extends PageProvider {
   }
 
   // 收藏/取消收藏帖子
-  void collectPost(PostModel v) {
+  void collectPost(PostModel v) async {
     if (collectPostIds.contains(v.id)) {
       collectPostIds.remove(v.id);
       database.unCollectPost(v.id);
     } else {
       collectPostIds.add(v.id);
-      database.collectPost(v);
+      await database.collectPost(v);
     }
     _refreshCollect();
   }

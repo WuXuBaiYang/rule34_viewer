@@ -3,6 +3,10 @@ import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 
+// 表格项构造器
+typedef GridItemBuilder<T> =
+    Widget Function(BuildContext context, T item, Widget child);
+
 /*
 * 帖子表格列表
 * @author wuxubaiyang
@@ -36,6 +40,9 @@ class PostGridList extends StatelessWidget {
   // hover回调
   final ValueChanged<int?>? onItemHover;
 
+  // 表格项构造器
+  final GridItemBuilder<PostModel>? itemBuilder;
+
   const PostGridList({
     super.key,
     required this.controller,
@@ -45,6 +52,7 @@ class PostGridList extends StatelessWidget {
     this.onCollect,
     this.hoverIndex,
     this.onItemHover,
+    this.itemBuilder,
     this.collectPostIds = const [],
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
   });
@@ -61,7 +69,9 @@ class PostGridList extends StatelessWidget {
           gridDelegate: gridDelegate,
           physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (_, i) {
-            return _buildGridItem(context, dataList[i], i);
+            final item = dataList[i];
+            final child = _buildGridItem(context, item, i);
+            return itemBuilder?.call(context, item, child) ?? child;
           },
         );
       },
