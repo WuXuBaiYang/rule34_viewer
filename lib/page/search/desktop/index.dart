@@ -1,7 +1,6 @@
 import 'package:jtech_base/jtech_base.dart';
 import 'package:flutter/material.dart';
 import 'package:rule34_viewer/api/api.dart';
-import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/post/desktop/index.dart';
