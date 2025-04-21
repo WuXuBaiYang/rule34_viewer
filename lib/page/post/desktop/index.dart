@@ -9,6 +9,7 @@ import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
+import 'package:window_manager/window_manager.dart';
 
 // 弹窗的方式展示帖子详情
 Future<void> showPostDesktopDialog(
@@ -62,6 +63,7 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
         Theme.of(context).primaryColor.withValues(alpha: 0.2),
       ),
     );
+    StadiumBorder;
     return GestureDetector(
       onTap: context.pop,
       child: Scaffold(
@@ -71,7 +73,27 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
             iconButtonTheme: IconButtonThemeData(style: buttonStyle),
             textButtonTheme: TextButtonThemeData(style: buttonStyle),
           ),
-          child: Padding(padding: EdgeInsets.all(24), child: _buildPostInfo()),
+          child: Column(
+            children: [
+              DragToMoveArea(
+                child: Container(
+                  width: 60,
+                  height: 6,
+                  margin: EdgeInsets.symmetric(horizontal: 45, vertical: 14),
+                  decoration: ShapeDecoration(
+                    shape: StadiumBorder(), // 直接使用StadiumBorder
+                    color: Theme.of(context).primaryColor, // 背景色
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 45),
+                  child: _buildPostInfo(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -87,26 +109,32 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
           spacing: 14,
           children: [
             IconButton(
-              onPressed: () => provider.navigatorPost(false),
+              onPressed: () => provider.navigatorPost(false).loading(context),
               icon: Icon(Icons.arrow_back_ios_new_rounded),
               padding: EdgeInsets.symmetric(vertical: 45),
             ),
             Expanded(
               child: Column(
-                spacing: 14,
+                spacing: 24,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildPostTitle(postInfo),
-                  if (postInfo.isVideo)
-                    _buildPostVideo(postInfo)
-                  else
-                    _buildPostImage(postInfo),
+                  Expanded(
+                    child: Card(
+                      margin: EdgeInsets.zero,
+                      clipBehavior: Clip.antiAlias,
+                      child:
+                          postInfo.isVideo
+                              ? _buildPostVideo(postInfo)
+                              : _buildPostImage(postInfo),
+                    ),
+                  ),
                 ],
               ),
             ),
             IconButton(
-              onPressed: () => provider.navigatorPost(true),
+              onPressed: () => provider.navigatorPost(true).loading(context),
               icon: Icon(Icons.arrow_forward_ios_rounded),
               padding: EdgeInsets.symmetric(vertical: 45),
             ),
@@ -209,9 +237,9 @@ class PostDesktopProvider extends BaseProvider {
 
   // 路由帖子信息
   Future<void> navigatorPost(bool isNext) async {
-    if (collectInfo != null) return _navigatorCollect(isNext);
+    if (collectInfo != null) return await _navigatorCollect(isNext);
     final href = isNext ? postInfo?.nextHref : postInfo?.prevHref;
-    if (href != null) _loadPostInfo(href);
+    if (href != null) await _loadPostInfo(href);
   }
 
   // 路由收藏帖子信息
