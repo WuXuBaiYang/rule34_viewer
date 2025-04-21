@@ -73,11 +73,23 @@ class CollectPostGridList extends StatelessWidget {
         child: Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAliasWithSaveLayer,
-          child: Stack(
-            fit: StackFit.expand,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (showImage)
-                CustomImage.network(item.thumbUrl, fit: BoxFit.cover),
+                Expanded(
+                  child: CustomImage.network(item.thumbUrl, fit: BoxFit.cover),
+                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () => onCollect?.call(item),
+                    icon: Icon(Icons.star),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
