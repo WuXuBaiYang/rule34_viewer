@@ -4,6 +4,7 @@ import 'package:rule34_viewer/api/api.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/model/post.dart';
+import 'package:rule34_viewer/page/post/desktop/index.dart';
 import 'package:rule34_viewer/widget/appbar_desktop.dart';
 import 'package:rule34_viewer/widget/post_grid_desktop.dart';
 
@@ -75,7 +76,7 @@ class SearchDesktopPage extends ProviderPage<SearchDesktopProvider> {
       selector: (_, p) => p.collectPostIds,
       builder: (_, collectPostIds, __) {
         return DesktopPostGridList(
-          onTap: router.goPost,
+          onTap: provider.goPost,
           collectPostIds: collectPostIds,
           onCollect: provider.collectPost,
           controller: provider.controller,
@@ -99,7 +100,15 @@ class SearchDesktopProvider extends PageProvider {
     growable: true,
   );
 
-  SearchDesktopProvider(super.context, super.state);
+  SearchDesktopProvider(super.context, super.state) {
+    // 获取初始搜索标签
+    final initialSearch = find('search');
+    if (initialSearch == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchController.text = initialSearch;
+      controller.startRefresh();
+    });
+  }
 
   // 获取搜索标签集合
   List<String> get searchTags => searchController.text.split(' ');
@@ -123,7 +132,18 @@ class SearchDesktopProvider extends PageProvider {
       collectPostIds.add(v.id);
       database.collectPost(v);
     }
-    collectPostIds = List.from(collectPostIds, growable: true);
+    _refreshCollect();
+  }
+
+  // 跳转到帖子详情
+  void goPost(PostModel v) async {
+    await showPostDesktopDialog(context, postInfo: v);
+    _refreshCollect();
+  }
+
+  // 刷新收藏列表
+  void _refreshCollect() {
+    collectPostIds = List.from(database.getAllCollectPostIds(), growable: true);
     notifyListeners();
   }
 }

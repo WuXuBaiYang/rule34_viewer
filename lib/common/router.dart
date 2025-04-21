@@ -1,15 +1,10 @@
 import 'package:jtech_base/jtech_base.dart';
-import 'package:rule34_viewer/database/model/collect.dart';
-import 'package:rule34_viewer/model/post.dart';
-import 'package:rule34_viewer/model/tag.dart';
 import 'package:rule34_viewer/page/collect/desktop/index.dart';
 import 'package:rule34_viewer/page/collect/mobile/index.dart';
 import 'package:rule34_viewer/page/download/desktop/index.dart';
 import 'package:rule34_viewer/page/download/mobile/index.dart';
 import 'package:rule34_viewer/page/home/desktop/index.dart';
 import 'package:rule34_viewer/page/home/mobile/index.dart';
-import 'package:rule34_viewer/page/post/desktop/index.dart';
-import 'package:rule34_viewer/page/post/mobile/index.dart';
 import 'package:rule34_viewer/page/search/desktop/index.dart';
 import 'package:rule34_viewer/page/search/mobile/index.dart';
 import 'package:rule34_viewer/page/setting/desktop/index.dart';
@@ -44,14 +39,6 @@ class Router extends BaseRouter {
               (_, state) => MultiTerminal(
                 desktop: SearchDesktopPage(state: state),
                 mobile: SearchMobilePage(state: state),
-              ),
-        ),
-        GoRoute(
-          path: '/post',
-          builder:
-              (_, state) => MultiTerminal(
-                desktop: PostDesktopPage(state: state),
-                mobile: PostMobilePage(state: state),
               ),
         ),
         GoRoute(
@@ -98,15 +85,8 @@ class Router extends BaseRouter {
   }
 
   // 跳转搜索
-  Future<void> goSearch() => push('/search');
-
-  // 跳转到帖子详情
-  Future<void> goPost(PostModel postInfo) =>
-      push('/post', extra: {'postInfo': postInfo});
-
-  // 跳转到帖子详情-从收藏
-  Future<void> goPostByCollect(CollectEntity collectInfo, SortType sort) =>
-      push('/post', extra: {'collectInfo': collectInfo, 'sort': sort});
+  Future<void> goSearch([String? search]) =>
+      push('/search', extra: {'search': search});
 
   // 跳转到收藏
   Future<void> goCollect() => push('/collect');

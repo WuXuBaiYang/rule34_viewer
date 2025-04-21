@@ -30,6 +30,11 @@ mixin CollectDatabase on BaseDatabase {
   void unCollectPost(String postId) =>
       collectBox.query(CollectEntity_.postId.equals(postId)).build().remove();
 
+  // 检查帖子是否已收藏
+  bool isPostCollected(String postId) =>
+      collectBox.query(CollectEntity_.postId.equals(postId)).build().count() >
+      0;
+
   // 分页获取收藏列表
   List<CollectEntity> getCollectList({
     int pageIndex = 1,

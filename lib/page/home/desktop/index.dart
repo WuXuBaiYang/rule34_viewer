@@ -7,6 +7,7 @@ import 'package:rule34_viewer/main.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/page/home/tag_sheet.dart';
 import 'package:rule34_viewer/page/home/tag_group.dart';
+import 'package:rule34_viewer/page/post/desktop/index.dart';
 import 'package:rule34_viewer/provider/config.dart';
 import 'package:rule34_viewer/widget/appbar_desktop.dart';
 import 'package:rule34_viewer/widget/divider.dart';
@@ -168,13 +169,12 @@ class HomeDesktopPageProvider extends PageProvider {
       collectPostIds.add(v.id);
       database.collectPost(v);
     }
-    collectPostIds = List.from(collectPostIds, growable: true);
-    notifyListeners();
+    _refreshCollect();
   }
 
   // 跳转到帖子详情
   void goPost(PostModel v) async {
-    await router.goPost(v);
+    await showPostDesktopDialog(context, postInfo: v);
     _refreshCollect();
   }
 

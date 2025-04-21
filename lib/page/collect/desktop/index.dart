@@ -1,9 +1,9 @@
 import 'package:jtech_base/jtech_base.dart';
 import 'package:flutter/material.dart';
-import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/tag.dart';
+import 'package:rule34_viewer/page/post/desktop/index.dart';
 import 'package:rule34_viewer/widget/appbar_desktop.dart';
 import 'package:rule34_viewer/widget/collect_post_grid_desktop.dart';
 
@@ -32,10 +32,10 @@ class CollectDesktopPage extends ProviderPage<CollectDesktopProvider> {
   // 构建收藏帖子列表
   Widget _buildCollectGridList(BuildContext context) {
     return DesktopCollectPostGridList(
+      onTap: provider.goPost,
       onCollect: provider.collectPost,
       controller: provider.controller,
       onRefreshLoad: provider.loadCollectList,
-      onTap: (v) => router.goPostByCollect(v, provider.sort),
     );
   }
 }
@@ -68,5 +68,12 @@ class CollectDesktopProvider extends PageProvider {
       database.collectPost(v.postInfo);
       controller.add(v);
     }
+  }
+
+  // 跳转到帖子详情
+  void goPost(CollectEntity v) async {
+    await showPostDesktopDialog(context, collectInfo: v, sort: sort);
+    // 如果帖子取消收藏，则从列表中移除
+    if (!database.isPostCollected(v.postId)) controller.remove(v);
   }
 }
