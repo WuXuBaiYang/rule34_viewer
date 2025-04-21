@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:jtech_base/jtech_base.dart';
 import 'package:rule34_viewer/model/post.dart';
 
@@ -12,20 +10,30 @@ import 'package:rule34_viewer/model/post.dart';
 class CollectEntity {
   int id = 0;
 
-  // 帖子id
-  String postId = '';
-
   // 收藏时间
   @Property(type: PropertyType.date)
   DateTime collectTime = DateTime.now();
 
-  // 帖子信息
-  @Transient()
-  PostModel? postInfo;
+  // 帖子id
+  String postId = '';
 
-  String get dbPostInfo => jsonEncode(postInfo?.to());
+  // 帖子href
+  String href = '';
 
-  set dbPostInfo(String v) => postInfo = PostModel.from(jsonDecode(v));
+  // 缩略图
+  String thumbUrl = '';
+
+  // 是否为视频
+  bool isVideo = false;
 
   CollectEntity();
+
+  // 生成帖子信息
+  @Transient()
+  PostModel get postInfo => PostModel.simple(
+    id: postId,
+    href: href,
+    isVideo: isVideo,
+    thumbUrl: thumbUrl,
+  );
 }

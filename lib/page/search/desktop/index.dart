@@ -115,13 +115,13 @@ class SearchDesktopProvider extends PageProvider {
   }
 
   // 收藏/取消收藏帖子
-  void collectPost(PostModel value) {
-    if (collectPostIds.contains(value.id)) {
-      collectPostIds.remove(value.id);
-      database.unCollectPost(value);
+  void collectPost(PostModel v) {
+    if (collectPostIds.contains(v.id)) {
+      collectPostIds.remove(v.id);
+      database.unCollectPost(v.id);
     } else {
-      collectPostIds.add(value.id);
-      database.collectPost(value);
+      collectPostIds.add(v.id);
+      database.collectPost(v);
     }
     collectPostIds = List.from(collectPostIds, growable: true);
     notifyListeners();

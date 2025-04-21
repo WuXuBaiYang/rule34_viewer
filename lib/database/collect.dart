@@ -21,15 +21,14 @@ mixin CollectDatabase on BaseDatabase {
         CollectEntity()
           ..postId = postInfo.id
           ..collectTime = DateTime.now()
-          ..postInfo = postInfo,
+          ..href = postInfo.href
+          ..isVideo = postInfo.isVideo
+          ..thumbUrl = postInfo.thumbUrl,
       );
 
   // 取消帖子收藏
-  void unCollectPost(PostModel postInfo) =>
-      collectBox
-          .query(CollectEntity_.postId.equals(postInfo.id))
-          .build()
-          .remove();
+  void unCollectPost(String postId) =>
+      collectBox.query(CollectEntity_.postId.equals(postId)).build().remove();
 
   // 分页获取收藏列表
   List<CollectEntity> getCollectList({

@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:6234250771155048513",
-      "lastPropertyId": "4:7359586988424590428",
+      "lastPropertyId": "7:598263130992193408",
       "name": "CollectEntity",
       "properties": [
         {
@@ -20,14 +20,24 @@
           "type": 10
         },
         {
-          "id": "3:2127997081604986612",
-          "name": "dbPostInfo",
-          "type": 9
-        },
-        {
           "id": "4:7359586988424590428",
           "name": "postId",
           "type": 9
+        },
+        {
+          "id": "5:6841116883883692017",
+          "name": "href",
+          "type": 9
+        },
+        {
+          "id": "6:6551020391890403580",
+          "name": "thumbUrl",
+          "type": 9
+        },
+        {
+          "id": "7:598263130992193408",
+          "name": "isVideo",
+          "type": 1
         }
       ],
       "relations": []
@@ -41,7 +51,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    2127997081604986612
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

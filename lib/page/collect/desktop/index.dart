@@ -61,13 +61,11 @@ class CollectDesktopProvider extends PageProvider {
 
   // 收藏/取消收藏帖子
   void collectPost(CollectEntity v) {
-    final postInfo = v.postInfo;
-    if (postInfo == null) return;
     if (controller.value.data.any((e) => v == e)) {
-      database.unCollectPost(postInfo);
+      database.unCollectPost(v.postId);
       controller.remove(v);
     } else {
-      database.collectPost(postInfo);
+      database.collectPost(v.postInfo);
       controller.add(v);
     }
   }

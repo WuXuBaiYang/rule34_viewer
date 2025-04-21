@@ -42,11 +42,11 @@ class PostDesktopPage extends ProviderPage<PostDesktopProvider> {
 
   // 构建帖子详情
   Widget _buildPostInfo(PostModel? postInfo) {
-    if (postInfo?.postInfo == null) return SizedBox();
+    if (postInfo == null) return SizedBox();
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (postInfo!.isVideo)
+        if (postInfo.isVideo)
           Video(controller: provider.controller)
         else
           ExtendedImage.network(
@@ -71,7 +71,7 @@ class PostDesktopProvider extends PageProvider {
   late final controller = VideoController(player);
 
   // 帖子详情
-  late PostModel? postInfo = find<PostModel>('postInfo');
+  PostModel? postInfo;
 
   // 收藏信息
   late CollectEntity? collectInfo = find<CollectEntity>('collectInfo');
@@ -82,8 +82,8 @@ class PostDesktopProvider extends PageProvider {
   PostDesktopProvider(super.context, super.state) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 加载帖子信息
-      final postInfo = this.postInfo ?? collectInfo?.postInfo;
-      if (postInfo != null) _loadPostInfo(postInfo.href).loading(context);
+      final href = find<PostModel>('postInfo')?.href ?? collectInfo?.href;
+      if (href != null) _loadPostInfo(href).loading(context);
     });
   }
 
@@ -102,8 +102,8 @@ class PostDesktopProvider extends PageProvider {
       sort: sort!,
       isNext: isNext,
     );
-    final postInfo = collectInfo?.postInfo;
-    if (postInfo != null) return _loadPostInfo(postInfo.href);
+    final href = collectInfo?.href;
+    if (href != null) return _loadPostInfo(href);
   }
 
   // 加载帖子信息

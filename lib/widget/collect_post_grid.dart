@@ -58,10 +58,8 @@ class CollectPostGridList extends StatelessWidget {
 
   // 构建帖子子项
   Widget _buildGridItem(BuildContext context, CollectEntity item, int index) {
-    final postInfo = item.postInfo;
-    if (postInfo == null) return const SizedBox();
     final borderColor =
-        postInfo.isVideo ? Theme.of(context).primaryColor : Colors.transparent;
+        item.isVideo ? Theme.of(context).primaryColor : Colors.transparent;
     final decoration = BoxDecoration(
       borderRadius: BorderRadius.circular(16),
       border: Border(bottom: BorderSide(width: 5, color: borderColor)),
@@ -79,7 +77,7 @@ class CollectPostGridList extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               if (showImage)
-                CustomImage.network(postInfo.thumbUrl, fit: BoxFit.cover),
+                CustomImage.network(item.thumbUrl, fit: BoxFit.cover),
             ],
           ),
         ),
