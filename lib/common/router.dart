@@ -64,7 +64,7 @@ class Router extends BaseRouter {
 
   // 跳转设置
   void goSetting() {
-    Toast.show('功能开发中');
+    Toast.show('msg');
     // go('/setting');
   }
 
