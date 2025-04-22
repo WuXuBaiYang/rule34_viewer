@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   objectbox_flutter_libs
   permission_handler_windows
   screen_retriever_windows
+  url_launcher_windows
   volume_controller
   window_manager
 )

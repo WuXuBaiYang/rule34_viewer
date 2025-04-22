@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:system_network_proxy/system_network_proxy.dart';
 import 'package:window_manager/window_manager.dart';
 
 /*
@@ -28,6 +29,12 @@ class XTool {
       windowManager.setSize(size);
     });
     return c.future..whenComplete(timer.cancel);
+  }
+
+  // 获取系统代理信息
+  static Future<String?> getSystemProxy() async {
+    if (!await SystemNetworkProxy.getProxyEnable()) return null;
+    return await SystemNetworkProxy.getProxyServer();
   }
 }
 

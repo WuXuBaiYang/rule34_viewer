@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:rule34_viewer/api/api.dart';
+import 'package:rule34_viewer/common/common.dart';
 import 'package:rule34_viewer/common/router.dart';
 import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 // 弹窗的方式展示帖子详情
@@ -63,7 +65,6 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
         Theme.of(context).primaryColor.withValues(alpha: 0.2),
       ),
     );
-    StadiumBorder;
     return GestureDetector(
       onTap: context.pop,
       child: Scaffold(
@@ -162,7 +163,7 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
           child: Text('@${postInfo?.postInfo?.poster ?? ''}'),
         ),
         TextButton(
-          onPressed: provider.goToPoster,
+          onPressed: provider.openWebView,
           style: ButtonStyle(
             maximumSize: WidgetStatePropertyAll(Size(200, 40)),
           ),
@@ -317,6 +318,12 @@ class PostDesktopProvider extends BaseProvider {
     if (postInfo == null) return;
 
     /// 显示帖子信息
+  }
+
+  // 打开网页
+  void openWebView() async {
+    final uri = Uri.parse('${Common.baseUrl}${postInfo?.href}');
+    if (!await launchUrl(uri)) showNoticeError('打开网页失败');
   }
 
   // 刷新收藏状态
