@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:system_network_proxy/system_network_proxy.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -36,6 +38,18 @@ class XTool {
     if (!await SystemNetworkProxy.getProxyEnable()) return null;
     return await SystemNetworkProxy.getProxyServer();
   }
+
+  // 写入到复制板
+  static Future<void> writeToClipboard(String text) =>
+      Clipboard.setData(ClipboardData(text: text));
+
+  // 写入文件到复制板
+  static Future<void> writeImageToClipboard(Uint8List image) =>
+      Pasteboard.writeImage(image);
+
+  // 写入文件到复制版
+  static Future<bool> writeFileToClipboard(List<String> files) =>
+      Pasteboard.writeFiles(files);
 }
 
 // 判断是否为桌面端

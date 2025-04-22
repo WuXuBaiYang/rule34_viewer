@@ -10,6 +10,7 @@ import 'package:rule34_viewer/database/database.dart';
 import 'package:rule34_viewer/database/model/collect.dart';
 import 'package:rule34_viewer/model/post.dart';
 import 'package:rule34_viewer/model/tag.dart';
+import 'package:rule34_viewer/tool/tool.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -154,24 +155,24 @@ class PostDesktopView extends ProviderView<PostDesktopProvider> {
 
   // 构建标题信息
   Widget _buildPostTitle(PostModel? postInfo) {
+    final poster = postInfo?.postInfo?.poster ?? '';
+    final href = postInfo?.href ?? '';
     return Row(
       spacing: 14,
       children: [
         CloseButton(),
         TextButton(
           onPressed: provider.goToPoster,
-          child: Text('@${postInfo?.postInfo?.poster ?? ''}'),
+          onLongPress: () => provider.copyToClipboard(poster),
+          child: Text('@$poster'),
         ),
         TextButton(
           onPressed: provider.openWebView,
+          onLongPress: () => provider.copyToClipboard('${Common.baseUrl}$href'),
           style: ButtonStyle(
             maximumSize: WidgetStatePropertyAll(Size(200, 40)),
           ),
-          child: Text(
-            postInfo?.href ?? '',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          child: Text(href, maxLines: 1, overflow: TextOverflow.ellipsis),
         ),
         Spacer(),
         createSelector<bool>(
@@ -317,6 +318,8 @@ class PostDesktopProvider extends BaseProvider {
   void showPostInfo() {
     if (postInfo == null) return;
 
+    showNoticeInfo('功能开发中');
+
     /// 显示帖子信息
   }
 
@@ -324,6 +327,13 @@ class PostDesktopProvider extends BaseProvider {
   void openWebView() async {
     final uri = Uri.parse('${Common.baseUrl}${postInfo?.href}');
     if (!await launchUrl(uri)) showNoticeError('打开网页失败');
+  }
+
+  // 复制信息到剪切板
+  void copyToClipboard(String text) {
+    if (text.isEmpty) return;
+    XTool.writeToClipboard(text);
+    showNoticeSuccess('已复制到剪切板');
   }
 
   // 刷新收藏状态
